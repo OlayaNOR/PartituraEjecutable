@@ -1,0 +1,136 @@
+# ============================================================
+# GRUPO 8 - TocaScript
+# Dominio: interpretacion musical
+#
+# Las reglas se evaluan en cada compas mientras la pieza suena.
+# Si la condicion se cumple, se aplica la accion.
+# ============================================================
+#
+# Sintaxis general de una regla:
+# AL <condicion> [Y|O <condicion>] TOCAR <accion>
+#
+# <condicion>  ::= <variable> <operador> <valor>
+# <operador>   ::= > | < | = | >= | <= | <>
+# <variable>   ::= identificador en minusculas con guion_bajo
+# <valor>      ::= numero (entero o decimal) | true | false | "texto"
+# <accion>     ::= identificador en minusculas con guion_bajo
+#
+# ------------------------------------------------------------
+# Formas adicionales que admite la sintaxis:
+#
+#   Negacion logica:            NO <condicion>
+#   Agrupacion:                 ( <condicion> O <condicion> )
+#   Condicion booleana simple:  es_coda
+#                               equivale a  es_coda = true
+#   Accion por asignacion:      <variable> = <valor>
+#   Acciones multiples:         <accion> Y <accion>
+#   Aritmetica en el valor:     tempo = tempo - 10
+#
+# ------------------------------------------------------------
+# Convencion de escritura:
+#
+#   - Palabras reservadas en MAYUSCULAS:  AL  TOCAR  Y  O  NO
+#   - Variables en minusculas con guion_bajo
+#   - Literales de texto entre comillas dobles
+#   - Una regla por linea
+#   - Comentarios con #
+#
+# Precedencia, de mas fuerte a mas debil:
+#   NO  ->  comparaciones  ->  Y  ->  O
+#   Los parentesis siempre mandan.
+# ============================================================
+
+
+# ------------------------------------------------------------
+# GRUPO A - Reglas con una sola condicion          (5 reglas)
+# ------------------------------------------------------------
+
+# R1 - acento fuerte
+# Si la pieza va rapido, a mas de 140 pulsos por minuto, tocala fuerte.
+AL tempo > 140 TOCAR dinamica = "ff"
+
+# R2 - acento de vals
+# En un compas de tres tiempos, marca el primero.
+AL compas = "3/4" TOCAR acentuar_primer_tiempo
+
+# R3 - cierre suave
+# En el cierre de la pieza, baja al volumen mas suave.
+AL es_coda TOCAR dinamica = "pp"
+
+# R4 - entrada tenue
+# La introduccion se toca suave.
+AL es_intro TOCAR dinamica = "p"
+
+# R5 - aclarar la textura
+# Si hay mas de tres instrumentos a la vez, que toquen las notas cortas.
+AL num_voces > 3 TOCAR articulacion = "staccato"
+
+
+# ------------------------------------------------------------
+# GRUPO B - Reglas con condiciones compuestas Y/O  (6 reglas)
+# ------------------------------------------------------------
+
+# R6 - empuje del estribillo
+# Si estamos en el estribillo y ademas la musica va intensa, entra la bateria.
+AL es_estribillo Y intensidad > 0.7 TOCAR activar_percusion
+
+# R7 - final abierto
+# Si pasamos el compas 24 o bien estamos en el cierre, sube el volumen poco a poco.
+AL compas_actual > 24 O es_coda TOCAR aplicar_crescendo
+
+# R8 - textura ligera
+# Si la pieza va lenta y no estamos repitiendo, toca las notas pegadas y fluidas.
+AL tempo < 80 Y NO hay_repeticion TOCAR articulacion = "legato"
+
+# R9 - contraste de secciones
+# En las estrofas y dentro de cualquier repeticion, volumen medio-bajo.
+AL es_estrofa O hay_repeticion TOCAR dinamica = "mp"
+
+# R10 - segunda vuelta
+# Cuando repetimos y ademas es la segunda vuelta, toca todo una octava mas agudo.
+AL hay_repeticion Y repeticion_actual = 2 TOCAR subir_una_octava
+
+# R11 - aire al final
+# Si es el cierre o la ultima seccion, y ademas no hay percusion, frena diez puntos.
+AL (es_coda O es_final) Y NO tiene_percusion TOCAR tempo = tempo - 10
+
+
+# ------------------------------------------------------------
+# GRUPO C - Reglas que combinan tipos distintos    (4 reglas)
+# numerico + booleano
+# ------------------------------------------------------------
+
+# R12 - climax
+# Si la intensidad esta casi al maximo y estamos en el estribillo,
+# sube al volumen mas alto y duplica la melodia una octava arriba.
+# Tipos: intensidad es double  ·  es_estribillo es boolean
+AL intensidad >= 0.9 Y es_estribillo TOCAR dinamica = "fff" Y duplicar_octava
+
+# R13 - seguridad de tesitura
+# Si la nota es mas aguda que el sol6 y la pieza no autorizo agudos, bajala una octava.
+# Tipos: nota_actual es int (91 = sol6 en MIDI)  ·  permitir_agudos es boolean
+AL nota_actual > 91 Y NO permitir_agudos TOCAR bajar_una_octava
+
+# R14 - no saturar la mezcla
+# Si hay cuatro o mas voces y una es percusion, baja el volumen general quince puntos.
+# Tipos: num_voces es int  ·  tiene_percusion es boolean
+AL num_voces >= 4 Y tiene_percusion TOCAR volumen = volumen - 15
+
+# R15 - ritardando final
+# Cuando faltan dos compases o menos y estamos en la ultima seccion,
+# baja la velocidad al 85 por ciento.
+# Tipos: compas_actual y duracion_total son int  ·  es_final es boolean
+AL compas_actual >= duracion_total - 2 Y es_final TOCAR tempo = tempo * 0.85
+
+
+# ============================================================
+# Clasificacion de las 15 reglas
+#
+#   Grupo A - una sola condicion        R1  R2  R3  R4  R5       5
+#   Grupo B - compuestas con Y/O        R6  R7  R8  R9 R10 R11   6
+#   Grupo C - numerico + booleano       R12 R13 R14 R15          4
+#
+# Nota: las reglas 6, 7, 8 y 10 tambien mezclan numerico con booleano.
+# Se clasificaron en el grupo B porque lo que las define principalmente
+# es el uso de conectores logicos.
+# ============================================================

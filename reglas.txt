@@ -6,14 +6,17 @@
 # Si la condicion se cumple, se aplica la accion.
 # ============================================================
 #
-# Sintaxis general de una regla:
+# Sintaxis general de una regla (gramatica completa en BNF: gramatica.md;
+# verificacion regla por regla: VERIFICACION-REGLAS.md):
 # AL <condicion> [Y|O <condicion>] TOCAR <accion>
 #
-# <condicion>  ::= <variable> <operador> <valor>
+# <condicion>  ::= <operando> <operador> <operando>
+# <operando>   ::= <variable> | <valor> | <operando> (+|-|*|/) <operando>
 # <operador>   ::= > | < | = | >= | <= | <>
 # <variable>   ::= identificador en minusculas con guion_bajo
 # <valor>      ::= numero (entero o decimal) | true | false | "texto"
 # <accion>     ::= identificador en minusculas con guion_bajo
+#                | <variable> = <operando>
 #
 # ------------------------------------------------------------
 # Formas adicionales que admite la sintaxis:
@@ -36,7 +39,7 @@
 #   - Comentarios con #
 #
 # Precedencia, de mas fuerte a mas debil:
-#   NO  ->  comparaciones  ->  Y  ->  O
+#   ( )  ->  * /  ->  + -  ->  comparaciones  ->  NO  ->  Y  ->  O
 #   Los parentesis siempre mandan.
 # ============================================================
 

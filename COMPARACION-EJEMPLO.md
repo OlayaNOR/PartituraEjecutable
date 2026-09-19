@@ -1,6 +1,6 @@
 # Comparación del ejemplo contra la gramática
 
-**TocaScript · Grupo 8** · Cada línea del programa de ejemplo, con la producción que la genera, los tokens que ve el lexer y cómo se abre cada uno hasta los átomos.
+**TocaScript · Grupo 8** · El programa de ejemplo, línea por línea, con la producción que la genera y los tokens que ve el lexer. Y el árbol completo del programa, producido por el parser (`verificar.py`) que implementa las 33 producciones.
 
 ## El programa
 
@@ -24,31 +24,115 @@ pieza "Fray Santiago" { cancion cierre }
 
 ## Línea por línea
 
-| Línea | Producción | Tokens | Cómo se abre hasta el fondo |
+| Línea | Producción | Tokens del lexer | Categorías que aparecen |
 |---|---|---|---|
-| `tempo 100` | 2 `<cabecera>` | `"tempo"` · `100` · `<nl>` | `<numero>` (26) → `<digito> <digito> <digito>` (30) → `"1" "0" "0"` |
-| `compas "4/4"` | 2 `<cabecera>` | `"compas"` · `"4/4"` · `<nl>` | `<texto>` (27) → `'"' <digito> "/" <digito> '"'` → `'"' "4" "/" "4" '"'` — la barra es un carácter del texto, no el operador |
-| `tonalidad "Do mayor"` | 2 `<cabecera>` | `"tonalidad"` · `"Do mayor"` · `<nl>` | `<texto>` → `'"' <mayuscula> <letra> " " <letra>… '"'` — `D` viene de `<mayuscula>` (29), el espacio es la alternativa `" "` |
-| *(línea en blanco)* | 31 `<nl>` | `<nl>` | Varios saltos seguidos equivalen a uno |
-| `motivo frase1 { do4:negra … }` | 4 `<motivo>` | `"motivo"` · `frase1` · `"{"` · (`do4` `":"` `negra`)×4 · `"}"` · `<nl>` | `<identificador>` (24) → `<letra>`×5 `<digito>` → `f r a s e 1` · `<evento>` (7) → `<nota> ":" <figura>` → `<nombre_nota>` `"do"` + `<octava>` `"4"` (8–10) · `<nombre_figura>` `"negra"` (11–12) |
-| `motivo frase2 { mi4:negra fa4:negra sol4:blanca }` | 4 `<motivo>` | igual, 3 eventos | `sol4:blanca` → `"sol"` `"4"` `":"` `"blanca"` |
-| `seccion cancion tipo estrofa { frase1 … }` | 5 `<seccion>` | `"seccion"` · `cancion` · `"tipo"` · `"estrofa"` · `"{"` · `frase1`×2 `frase2`×2 · `"}"` · `<nl>` | `<tipo_seccion>` (6) → `"estrofa"` · dentro, cuatro `<identificador>` |
-| `seccion cierre tipo coda { [do3 mi3 sol3 do4]:redonda }` | 5 `<seccion>` | `"seccion"` · `cierre` · `"tipo"` · `"coda"` · `"{"` · `"["` `do3` `mi3` `sol3` `do4` `"]"` `":"` `redonda` · `"}"` · `<nl>` | Segunda alternativa de `<evento>`: `"[" <nota> { <nota> } "]" ":" <figura>` |
-| `AL es_estrofa O hay_repeticion TOCAR dinamica = "mp"` | 13 `<regla>` | `"AL"` · `es_estrofa` · `"O"` · `hay_repeticion` · `"TOCAR"` · `dinamica` · `"="` · `"mp"` · `<nl>` | `<expresion>` (14) → `<termino> "O" <termino>` → cada uno `<factor>` → `<variable>` → `<identificador>` · `<accion>` (22) → `<variable> "=" <operando>` → `<valor>` → `<texto>` → `'"' "m" "p" '"'` |
-| `AL es_coda TOCAR dinamica = "pp"` | 13 `<regla>` | `"AL"` · `es_coda` · `"TOCAR"` · `dinamica` · `"="` · `"pp"` · `<nl>` | La expresión es un solo `<factor>` → `<variable>`: una booleana sola ya es condición |
-| `AL (es_coda O es_final) Y NO tiene_percusion TOCAR tempo = tempo - 10` | 13 `<regla>` | `"AL"` · `"("` · `es_coda` · `"O"` · `es_final` · `")"` · `"Y"` · `"NO"` · `tiene_percusion` · `"TOCAR"` · `tempo` · `"="` · `tempo` · `"-"` · `10` · `<nl>` | `<termino>` (15) → `<factor> "Y" <factor>` · 1.º `"(" <expresion> ")"` · 2.º `"NO" <factor>` (16) · `<operando>` (19) → `<operando> <op_aritmetico> <operando>` → `tempo` `"-"` `<numero>` → `"1" "0"` |
-| `pieza "Fray Santiago" { cancion cierre }` | 3 `<pieza>` | `"pieza"` · `"Fray Santiago"` · `"{"` · `cancion` · `cierre` · `"}"` · `<nl>` | `<texto>` → `'"' <mayuscula> <letra><letra><letra> " " <mayuscula> <letra>… '"'` |
+| `tempo 100` | 3 `<ajuste>` (dentro de `<cabecera>`) | `tempo` · `100` | `<identificador>` (26); `<numero>` (28) |
+| `compas "4/4"` | 3 `<ajuste>` (dentro de `<cabecera>`) | `compas` · `"4/4"` | `<identificador>` (26); `<texto>` (29) |
+| `tonalidad "Do mayor"` | 3 `<ajuste>` (dentro de `<cabecera>`) | `tonalidad` · `"Do mayor"` | `<identificador>` (26); `<texto>` (29) |
+| `(vacía)` | — | línea en blanco | `<nl>` extra; el lexer los colapsa |
+| `motivo frase1 { do4:negra re4:negra mi4:negra do4:negra }` | 5 `<motivo>` | `motivo` · `frase1` · `{` · `do4` · `:` · `negra` · `re4` · `:` · `negra` · `mi4` · `:` · `negra` · `do4` · `:` · `negra` · `}` | `<identificador>` (26); `<nombre_figura>` (13); `<nota>` (9); terminal `":"`; terminal `"motivo"`; terminal `"{"`; terminal `"}"` |
+| `motivo frase2 { mi4:negra fa4:negra sol4:blanca }` | 5 `<motivo>` | `motivo` · `frase2` · `{` · `mi4` · `:` · `negra` · `fa4` · `:` · `negra` · `sol4` · `:` · `blanca` · `}` | `<identificador>` (26); `<nombre_figura>` (13); `<nota>` (9); terminal `":"`; terminal `"motivo"`; terminal `"{"`; terminal `"}"` |
+| `(vacía)` | — | línea en blanco | `<nl>` extra; el lexer los colapsa |
+| `seccion cancion tipo estrofa { frase1 frase1 frase2 frase2 }` | 6 `<seccion>` | `seccion` · `cancion` · `tipo` · `estrofa` · `{` · `frase1` · `frase1` · `frase2` · `frase2` · `}` | `<identificador>` (26); `<tipo_seccion>` (7); terminal `"seccion"`; terminal `"tipo"`; terminal `"{"`; terminal `"}"` |
+| `seccion cierre tipo coda { [do3 mi3 sol3 do4]:redonda }` | 6 `<seccion>` | `seccion` · `cierre` · `tipo` · `coda` · `{` · `[` · `do3` · `mi3` · `sol3` · `do4` · `]` · `:` · `redonda` · `}` | `<identificador>` (26); `<nombre_figura>` (13); `<nota>` (9); `<tipo_seccion>` (7); terminal `":"`; terminal `"["`; terminal `"]"`; terminal `"seccion"`; terminal `"tipo"`; terminal `"{"`; terminal `"}"` |
+| `(vacía)` | — | línea en blanco | `<nl>` extra; el lexer los colapsa |
+| `AL es_estrofa O hay_repeticion TOCAR dinamica = "mp"` | 14 `<regla>` | `AL` · `es_estrofa` · `O` · `hay_repeticion` · `TOCAR` · `dinamica` · `=` · `"mp"` | `<identificador>` (26); `<texto>` (29); terminal `"="` (comparación en `<condicion>`, asignación en `<accion>`); terminal `"AL"`; terminal `"O"`; terminal `"TOCAR"` |
+| `AL es_coda TOCAR dinamica = "pp"` | 14 `<regla>` | `AL` · `es_coda` · `TOCAR` · `dinamica` · `=` · `"pp"` | `<identificador>` (26); `<texto>` (29); terminal `"="` (comparación en `<condicion>`, asignación en `<accion>`); terminal `"AL"`; terminal `"TOCAR"` |
+| `AL (es_coda O es_final) Y NO tiene_percusion TOCAR tempo = tempo - 10` | 14 `<regla>` | `AL` · `(` · `es_coda` · `O` · `es_final` · `)` · `Y` · `NO` · `tiene_percusion` · `TOCAR` · `tempo` · `=` · `tempo` · `-` · `10` | `<identificador>` (26); `<numero>` (28); terminal `"("`; terminal `")"`; terminal `"-"`; terminal `"="` (comparación en `<condicion>`, asignación en `<accion>`); terminal `"AL"`; terminal `"NO"`; terminal `"O"`; terminal `"TOCAR"`; terminal `"Y"` |
+| `(vacía)` | — | línea en blanco | `<nl>` extra; el lexer los colapsa |
+| `pieza "Fray Santiago" { cancion cierre }` | 4 `<pieza>` | `pieza` · `"Fray Santiago"` · `{` · `cancion` · `cierre` · `}` | `<identificador>` (26); `<texto>` (29); terminal `"pieza"`; terminal `"{"`; terminal `"}"` |
 
-## Lo que comprueba la gramática y lo que no
+## El árbol del programa (dos niveles)
+
+```
+<programa> (1)
+  <cabecera> (2)
+    <ajuste> (3)  → <variable> <valor>
+    <nl> (33)  → "↵"
+    <ajuste> (3)  → <variable> <valor>
+    <nl> (33)  → "↵"
+    <ajuste> (3)  → <variable> <valor>
+    <nl> (33)  → "↵"
+  <motivo> (5)
+    "motivo"
+    <identificador> (26)  → <letra> <letra> <letra> <letra> <letra> <digito>
+    "{"
+    <evento> (8)  → <nota> ":" <figura>
+    <evento> (8)  → <nota> ":" <figura>
+    <evento> (8)  → <nota> ":" <figura>
+    <evento> (8)  → <nota> ":" <figura>
+    "}"
+    <nl> (33)  → "↵"
+  <motivo> (5)
+    "motivo"
+    <identificador> (26)  → <letra> <letra> <letra> <letra> <letra> <digito>
+    "{"
+    <evento> (8)  → <nota> ":" <figura>
+    <evento> (8)  → <nota> ":" <figura>
+    <evento> (8)  → <nota> ":" <figura>
+    "}"
+    <nl> (33)  → "↵"
+  <seccion> (6)
+    "seccion"
+    <identificador> (26)  → <letra> <letra> <letra> <letra> <letra> <letra> <letra>
+    "tipo"
+    <tipo_seccion> (7)  → "estrofa"
+    "{"
+    <identificador> (26)  → <letra> <letra> <letra> <letra> <letra> <digito>
+    <identificador> (26)  → <letra> <letra> <letra> <letra> <letra> <digito>
+    <identificador> (26)  → <letra> <letra> <letra> <letra> <letra> <digito>
+    <identificador> (26)  → <letra> <letra> <letra> <letra> <letra> <digito>
+    "}"
+    <nl> (33)  → "↵"
+  <seccion> (6)
+    "seccion"
+    <identificador> (26)  → <letra> <letra> <letra> <letra> <letra> <letra>
+    "tipo"
+    <tipo_seccion> (7)  → "coda"
+    "{"
+    <evento> (8)  → "[" <nota> <nota> <nota> <nota> "]" ":" <figura>
+    "}"
+    <nl> (33)  → "↵"
+  <regla> (14)
+    "AL"
+    <expresion> (15)  → <termino> "O" <termino>
+    "TOCAR"
+    <acciones> (23)  → <accion>
+    <nl> (33)  → "↵"
+  <regla> (14)
+    "AL"
+    <expresion> (15)  → <termino>
+    "TOCAR"
+    <acciones> (23)  → <accion>
+    <nl> (33)  → "↵"
+  <regla> (14)
+    "AL"
+    <expresion> (15)  → <termino>
+    "TOCAR"
+    <acciones> (23)  → <accion>
+    <nl> (33)  → "↵"
+  <pieza> (4)
+    "pieza"
+    <texto> (29)  → '"' <mayuscula> <letra> <letra> <letra> " " <mayuscula> <letra> <letra> <letra> <letra> <letra> <letra> <letra> '"'
+    "{"
+    <identificador> (26)  → <letra> <letra> <letra> <letra> <letra> <letra> <letra>
+    <identificador> (26)  → <letra> <letra> <letra> <letra> <letra> <letra>
+    "}"
+    <nl> (33)  → "↵"
+```
+
+El árbol completo tiene **371 nodos no terminales** y **298 hojas terminales**. Las hojas, leídas de izquierda a derecha, son el programa entero, símbolo a símbolo.
+
+## Lo que la gramática comprueba y lo que no
 
 | Gramática (sintaxis) | Intérprete (semántica) |
 |---|---|
-| Que la cabecera tenga tres líneas en orden | Que `frase1` en la sección sea un motivo declarado |
-| Que cada texto abra y cierre con `'"'` | Que `cancion` y `cierre` sean secciones existentes |
-| Que cada evento lleve figura | Que `es_estrofa`, `tempo`, `dinamica` estén entre las 20 variables |
-| Que los paréntesis cierren | Que `"mp"` sea una dinámica válida |
-| Que cada regla ocupe una línea | Que `tempo - 10` no dé negativo |
+| Que la cabecera tenga tres ajustes, uno por línea | Que los tres sean `tempo`, `compas` y `tonalidad`, y con el tipo correcto |
+| Que cada texto abra y cierre con `'"'` | Que `frase1` en la sección sea un motivo declarado |
+| Que cada evento lleve figura | Que `cancion` y `cierre` sean secciones existentes |
+| Que los paréntesis cierren | Que `es_estrofa`, `tempo`, `dinamica` estén entre las 20 variables |
+| Que cada regla ocupe una línea | Que `"mp"` sea una dinámica válida |
 
 ## Cobertura
 
-Las 31 producciones generan el ejemplo completo: cada token es un terminal entre comillas de la gramática, o se abre hasta `<letra>`, `<digito>` y `<nl>`. Nada queda sin derivar.
+Las 33 producciones generan el ejemplo completo: cada token es un terminal entre comillas, o se abre hasta `<letra>`, `<digito>` y `<nl>`. El archivo `ejemplos/frere-jacques.toca` del repositorio usa además `simultaneo`, `voz … con …`, `repetir` y `exportar`, que pertenecen a la gramática extendida y no se sustentan en este parcial.

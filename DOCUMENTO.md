@@ -85,7 +85,7 @@ Toda regla tiene la misma forma: `AL`, una condición, `TOCAR`, una acción. Las
 | Acciones múltiples | `dinamica = "fff" Y duplicar_octava` |
 | Aritmética en el valor | `tempo = tempo - 10` |
 
-**Precedencia**, de más fuerte a más débil: `NO` → comparaciones → `Y` → `O`. Los paréntesis siempre mandan.
+**Precedencia**, de más fuerte a más débil: `*` `/` → `+` `-` → comparaciones → `NO` → `Y` → `O`. Los paréntesis siempre mandan. La gramática la codifica con niveles: `<operando>` → `<sumando>` → `<primario>` para la aritmética y `<expresion>` → `<termino>` → `<factor>` para la lógica.
 
 ---
 
@@ -133,9 +133,9 @@ Las 15 se revisan en cada compás, en orden de declaración. Si dos fijan la mis
 
 ## 5 · El diccionario de palabras reservadas
 
-TocaScript reserva **66 términos**. La lista completa está en `palabras_reservadas.md`; aquí se agrupan por categoría.
+TocaScript reserva **72 términos** en su lenguaje completo; la lista está en `palabras_reservadas.md`. Aquí se agrupan por categoría los que usa esta gramática.
 
-### 5.1 · Palabras clave de las reglas (5)
+### 5.1 · Palabras clave de las reglas
 
 | Palabra | Categoría | Significado |
 |---|---|---|
@@ -145,16 +145,16 @@ TocaScript reserva **66 términos**. La lista completa está en `palabras_reserv
 | `O` | Operador lógico | Disyunción. |
 | `NO` | Operador lógico | Negación. |
 
-### 5.2 · Operadores (10)
+### 5.2 · Operadores
 
 | Símbolo | Categoría | Significado |
 |---|---|---|
 | `>` `<` `>=` `<=` | Relacional | Mayor, menor, mayor o igual, menor o igual |
 | `=` | Relacional / asignación | Antes de `TOCAR` compara; después de `TOCAR` asigna |
 | `<>` | Relacional | Distinto de |
-| `+` `-` `*` `/` | Aritmético | Suma, resta (también signo negativo), multiplicación, división (también separa las cifras del compás: `4/4`) |
+| `+` `-` `*` `/` | Aritmético | Suma, resta, multiplicación, división (el `/` también separa las cifras del compás dentro de un texto: `"4/4"`) |
 
-### 5.3 · Literales y símbolos (12)
+### 5.3 · Literales y símbolos
 
 | Símbolo | Categoría | Significado |
 |---|---|---|
@@ -170,7 +170,7 @@ TocaScript reserva **66 términos**. La lista completa está en `palabras_reserv
 | `#` | Símbolo | Comentario hasta fin de línea; sostenido dentro de una nota |
 | `%` | Símbolo | Porcentaje: `velocidad 200%` |
 
-### 5.4 · Palabras clave de la pieza (22)
+### 5.4 · Palabras clave de la pieza
 
 | Palabra | Significado |
 |---|---|
@@ -194,7 +194,7 @@ TocaScript reserva **66 términos**. La lista completa está en `palabras_reserv
 | `en` | Cambia la tonalidad de un motivo |
 | `crescendo` · `hasta` · `durante` | Sube el volumen progresivamente, con destino y duración |
 
-### 5.5 · Literales musicales (17)
+### 5.5 · Literales musicales
 
 | Palabras | Categoría | Significado |
 |---|---|---|
@@ -212,7 +212,7 @@ TocaScript **no define un sistema de tipos propio** — fue una decisión delibe
 
 | Tipo | Forma | Ejemplos válidos | Inválidos |
 |---|---|---|---|
-| Número entero | Dígitos, con signo opcional | `96` `-12` `+5` | `1.` |
+| Número entero | Uno o más dígitos, sin signo: el `-` es siempre un operador | `96` `140` | `-12` `1.` |
 | Número decimal | Dígitos, punto, dígitos | `0.85` `4.5` | `.5` `0,85` |
 | Booleano | Solo dos valores | `true` `false` | `verdadero` `TRUE` |
 | Texto | Entre comillas dobles, sin saltos de línea | `"ff"` `"Do mayor"` | `'ff'` |
@@ -268,66 +268,105 @@ La `intensidad` se deriva de la dinámica vigente: `"pp"` 0.1 · `"p"` 0.25 · `
 
 ---
 
-## 7 · La gramática en BNF: 31 producciones
+## 7 · La gramática en BNF: 33 producciones
 
-Todos los terminales van entre comillas dobles —palabras clave, símbolos, letras y dígitos— y todo no terminal se abre en otra producción hasta llegar a `<letra>`, `<digito>` y `<nl>`. **Ninguna categoría queda sin definir.**
+Todos los terminales van entre comillas dobles —palabras clave, símbolos, letras y dígitos— y todo no terminal se abre en otra producción hasta llegar a `<letra>`, `<digito>` y `<nl>`. Ninguna categoría queda sin definir. Terminales y no terminales van etiquetados como comentario al inicio del bloque, y cada producción tiene su ficha propia.
 
 ```
+# ═══════════════════════════════════════════════════════════════
+#  GRAMÁTICA DE TocaScript · 33 producciones · Grupo 8
+# ═══════════════════════════════════════════════════════════════
+#
+#  Convención:  <x> no terminal · "x" terminal · '"' la comilla doble como terminal
+#               ::= se define como · | alternativa · { } cero o más · [ ] opcional
+#               <nl> salto de línea (fuera de llaves; dentro cuenta como espacio)
+#               los espacios entre símbolos no se escriben: separan terminales y el lexer los descarta
+#               # comentario: etiquetas y restricciones que el BNF no puede expresar
+#
+#  NO TERMINALES (33) — llevan ángulos y se abren en su propia producción:
+#    <programa> <cabecera> <ajuste> <pieza> <motivo> <seccion> <tipo_seccion> <evento> <nota> <nombre_nota> <octava>
+#    <figura> <nombre_figura> <regla> <expresion> <termino> <factor> <condicion> <operador> <operando> <sumando> <primario>
+#    <acciones> <accion> <variable> <identificador> <valor> <numero> <texto> <letra> <mayuscula> <digito> <nl>
+#
+#  TERMINALES — van entre comillas; ahí termina la derivación y son lo que el lexer reconoce:
+#    Palabras clave de la regla  "AL" "TOCAR" "Y" "O" "NO"
+#    Palabras clave de la pieza  "motivo" "seccion" "tipo" "pieza" "silencio"
+#    Tipos de sección            "intro" "estrofa" "estribillo" "coda"
+#    Nombres de nota             "do" "re" "mi" "fa" "sol" "la" "si"
+#    Figuras                     "redonda" "blanca" "negra" "corchea" "semicorchea" "fusa"
+#    Alteraciones y puntillo     "#" "b" "."
+#    Operadores relacionales     ">" "<" ">=" "<=" "=" "<>"
+#    Operadores aritméticos      "+" "-" "*" "/"
+#    Booleanos                   "true" "false"
+#    Símbolos                    "(" ")" "{" "}" "[" "]" ":" "_" " " '"' "↵"
+#    Átomos                      "a … z" "A … Z" "0 … 9"
+#
 
 # ── Estructura del archivo ──
  1  <programa> ::= <cabecera> { <motivo> | <seccion> | <regla> } <pieza>
- 2  <cabecera> ::= "tempo" <numero> <nl>
-                   "compas" <texto> <nl>
-                   "tonalidad" <texto> <nl>
- 3  <pieza> ::= "pieza" <texto> "{" { <identificador> } "}" <nl>
- 4  <motivo> ::= "motivo" <identificador> "{" { <evento> } "}" <nl>
- 5  <seccion> ::= "seccion" <identificador> "tipo" <tipo_seccion>
+ 2  <cabecera> ::= <ajuste> <nl>
+                   <ajuste> <nl>
+                   <ajuste> <nl>
+ 3  <ajuste> ::= <variable> <valor>
+ 4  <pieza> ::= "pieza" <texto> "{" { <identificador> } "}" <nl>
+ 5  <motivo> ::= "motivo" <identificador> "{" { <evento> } "}" <nl>
+ 6  <seccion> ::= "seccion" <identificador> "tipo" <tipo_seccion>
                   "{" { <evento> | <identificador> } "}" <nl>
- 6  <tipo_seccion> ::= "intro" | "estrofa" | "estribillo" | "coda"
+ 7  <tipo_seccion> ::= "intro" | "estrofa" | "estribillo" | "coda"
 
 # ── La música ──
- 7  <evento> ::= <nota> ":" <figura> | "[" <nota> { <nota> } "]" ":" <figura> | "silencio" ":" <figura>
- 8  <nota> ::= <nombre_nota> [ "#" | "b" ] <octava>
- 9  <nombre_nota> ::= "do" | "re" | "mi" | "fa" | "sol" | "la" | "si"
-10  <octava> ::= <digito>
-11  <figura> ::= <nombre_figura> [ "." ]
-12  <nombre_figura> ::= "redonda" | "blanca" | "negra" | "corchea" | "semicorchea" | "fusa"
+ 8  <evento> ::= <nota> ":" <figura>
+               | "[" <nota> { <nota> } "]" ":" <figura>
+               | "silencio" ":" <figura>
+ 9  <nota> ::= <nombre_nota> [ "#" | "b" ] <octava>
+10  <nombre_nota> ::= "do" | "re" | "mi" | "fa" | "sol" | "la" | "si"
+11  <octava> ::= <digito>
+12  <figura> ::= <nombre_figura> [ "." ]
+13  <nombre_figura> ::= "redonda" | "blanca" | "negra" | "corchea" | "semicorchea" | "fusa"
 
 # ── La regla de interpretación ──
-13  <regla> ::= "AL" <expresion> "TOCAR" <acciones> <nl>
-14  <expresion> ::= <termino> { "O" <termino> }
-15  <termino> ::= <factor> { "Y" <factor> }
-16  <factor> ::= "NO" <factor> | "(" <expresion> ")" | <condicion> | <variable>
-17  <condicion> ::= <operando> <operador> <operando>
-18  <operador> ::= ">" | "<" | ">=" | "<=" | "=" | "<>"
-19  <operando> ::= <variable> | <valor> | <operando> <op_aritmetico> <operando>
-20  <op_aritmetico> ::= "+" | "-" | "*" | "/"
-21  <acciones> ::= <accion> { "Y" <accion> }
-22  <accion> ::= <variable> "=" <operando> | <identificador>
+14  <regla> ::= "AL" <expresion> "TOCAR" <acciones> <nl>
+15  <expresion> ::= <termino> { "O" <termino> }
+16  <termino> ::= <factor> { "Y" <factor> }
+17  <factor> ::= "NO" <factor>
+               | "(" <expresion> ")"
+               | <condicion>
+               | <variable>
+18  <condicion> ::= <operando> <operador> <operando>
+19  <operador> ::= ">" | "<" | ">=" | "<=" | "=" | "<>"
+20  <operando> ::= <sumando> { "+" <sumando> | "-" <sumando> }
+21  <sumando> ::= <primario> { "*" <primario> | "/" <primario> }
+22  <primario> ::= <variable> | <valor> | "(" <operando> ")"
+23  <acciones> ::= <accion> { "Y" <accion> }
+24  <accion> ::= <variable> "=" <operando>
+               | <identificador>
 
 # ── Nombres y valores ──
-23  <variable> ::= <identificador>
-24  <identificador> ::= <letra> { <letra> | <digito> | "_" }
-25  <valor> ::= <numero> | "true" | "false" | <texto>
-26  <numero> ::= <digito> { <digito> } [ "." <digito> { <digito> } ]
-27  <texto> ::= '"' { <letra> | <mayuscula> | <digito> | " " | "/" } '"'
+25  <variable> ::= <identificador>
+26  <identificador> ::= <letra> { <letra> | <digito> | "_" }
+                        # y no puede coincidir con ninguna palabra reservada
+27  <valor> ::= <numero> | "true" | "false" | <texto>
+28  <numero> ::= <digito> { <digito> } [ "." <digito> { <digito> } ]
+29  <texto> ::= '"' { <letra> | <mayuscula> | <digito> | " " | "/" } '"'
 
 # ── Átomos ──
-28  <letra> ::= "a" | "b" | "c" | "..." | "z"
-29  <mayuscula> ::= "A" | "B" | "C" | "..." | "Z"
-30  <digito> ::= "0" | "1" | "2" | "..." | "9"
-31  <nl> ::= "↵"
+30  <letra> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m"
+              | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+31  <mayuscula> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M"
+                  | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+32  <digito> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+33  <nl> ::= "↵"
 ```
 
 Los tres niveles `<expresion>` → `<termino>` → `<factor>` codifican la precedencia sin reglas aparte: `NO` liga más fuerte que `Y`, y `Y` más fuerte que `O`.
 
-Las comillas de los textos viven en la producción 27, `<texto>`: empieza y termina en `'"'`. Las producciones que llevan un texto —cabecera, pieza, valor— dicen `<texto>`, y al derivar aparecen las comillas. Los saltos de línea son el terminal `<nl>` (31), al final de cada construcción de nivel superior.
+**Verificación regla por regla.** Las 15 reglas de `reglas.txt` se derivaron una a una con un parser (`verificar.py`) que implementa estas 33 producciones: 15 de 15. La primera pasada falló en cinco porque la cabecera declaraba `"tempo"` y `"compas"` como palabras clave y las reglas los usan como variables; se ajustó la gramática —la cabecera es ahora tres `<ajuste> ::= <variable> <valor>`— y no las reglas. El detalle está en el documento aparte *Verificación regla por regla*.
 
 ---
 
 ## 8 · La convención de notación, estandarizada
 
-Aplicada igual en las 31 producciones:
+Aplicada igual en las 33 producciones:
 
 | Símbolo | Significado |
 |---|---|
@@ -338,9 +377,12 @@ Aplicada igual en las 31 producciones:
 | `\|` | Alternativa |
 | `{ … }` | Repetición: cero o más veces |
 | `[ … ]` | Opcional: cero o una vez |
-| `<nl>` | Salto de línea. Fuera de llaves cada construcción termina en uno; dentro de `{ }` los saltos cuentan como espacio |
+| `<nl>` | Salto de línea. Fuera de llaves cada construcción termina en uno; dentro de `{ }` los saltos cuentan como espacio. Su terminal `"↵"` es el fin de línea del archivo (LF o CR LF) |
+| espacio | Los espacios y tabulaciones entre símbolos no se escriben en las producciones: separan terminales consecutivos y el lexer los descarta. Solo dentro de `<texto>` el espacio es un terminal, `" "` |
+| `#` | Comentario dentro del bloque: las etiquetas de terminales y no terminales, y las restricciones que el BNF no puede expresar (la de `<identificador>`) |
+| líneas en blanco y comentarios | En un programa, las líneas en blanco y los comentarios (`#` al inicio de la línea o tras un espacio, hasta el fin de la línea) los descarta el lexer antes del análisis; no forman parte de la gramática. `#` pegado a una nota es el sostenido, `fa#4` |
 
-**Por qué todos los terminales van entre comillas.** TocaScript usa llaves y corchetes como parte de su sintaxis real: `motivo frase1 { … }`, `[do4 mi4 sol4]`. Escritos sin marcar, no habría forma de saber si `{ }` significa «repetición» o «aquí va una llave». Por eso todo lo que se teclea va entre comillas —`"{"` es una llave del programa; `{ }` sin comillas es repetición— y, por coherencia, también las palabras clave: `"AL"`, `"tempo"`, `"do"`.
+**Por qué todos los terminales van entre comillas.** TocaScript usa llaves y corchetes como parte de su sintaxis real: `motivo frase1 { … }`, `[do4 mi4 sol4]`. Escritos sin marcar, no habría forma de saber si `{ }` significa «repetición» o «aquí va una llave». Por eso todo lo que se teclea va entre comillas —`"{"` es una llave del programa; `{ }` sin comillas es repetición— y, por coherencia, también las palabras clave: `"AL"`, `"motivo"`, `"do"`.
 
 Los nombres de los no terminales van **sin tildes** (`<condicion>`, `<accion>`), para que el lexer no tenga que lidiar con caracteres acentuados.
 
@@ -352,36 +394,44 @@ El criterio, en palabras del profesor: *«terminal es lo que no tenga llavecitas
 
 La distinción importa porque **el lexer reconoce los terminales**: son los que le dicen dónde acaba una sentencia.
 
-### No terminales — 31
+### No terminales — 33
 
 Uno por cada producción; todos se abren en otra:
 
-`<programa>` `<cabecera>` `<pieza>` `<motivo>` `<seccion>` `<tipo_seccion>` `<evento>` `<nota>` `<nombre_nota>` `<octava>` `<figura>` `<nombre_figura>` `<regla>` `<expresion>` `<termino>` `<factor>` `<condicion>` `<operador>` `<operando>` `<op_aritmetico>` `<acciones>` `<accion>` `<variable>` `<identificador>` `<valor>` `<numero>` `<texto>` `<letra>` `<mayuscula>` `<digito>` `<nl>`
+`<programa>` `<cabecera>` `<ajuste>` `<pieza>` `<motivo>` `<seccion>` `<tipo_seccion>` `<evento>` `<nota>` `<nombre_nota>` `<octava>` `<figura>` `<nombre_figura>` `<regla>` `<expresion>` `<termino>` `<factor>` `<condicion>` `<operador>` `<operando>` `<sumando>` `<primario>` `<acciones>` `<accion>` `<variable>` `<identificador>` `<valor>` `<numero>` `<texto>` `<letra>` `<mayuscula>` `<digito>` `<nl>`
 
 ### Terminales
 
-Todo lo que va entre comillas en la gramática. Son los 66 términos reservados del diccionario (sección 5) más los átomos de los que se construyen los nombres, números y textos:
+Todo lo que va entre comillas en la gramática. Son los términos reservados que el lenguaje usa en estas 33 producciones, más los átomos de los que se construyen nombres, números y textos:
 
 | Categoría | Terminales |
 |---|---|
 | Palabras clave de la regla | `"AL"` `"TOCAR"` `"Y"` `"O"` `"NO"` |
-| Palabras clave de la pieza | `"tempo"` `"compas"` `"tonalidad"` `"motivo"` `"seccion"` `"tipo"` `"pieza"` `"silencio"` |
+| Palabras clave de la pieza | `"motivo"` `"seccion"` `"tipo"` `"pieza"` `"silencio"` |
 | Tipos de sección | `"intro"` `"estrofa"` `"estribillo"` `"coda"` |
-| Nombres de nota y figura | `"do"` … `"si"` · `"redonda"` … `"fusa"` |
-| Operadores | `">"` `"<"` `">="` `"<="` `"="` `"<>"` `"+"` `"-"` `"*"` `"/"` |
+| Nombres de nota | `"do"` `"re"` `"mi"` `"fa"` `"sol"` `"la"` `"si"` |
+| Figuras | `"redonda"` `"blanca"` `"negra"` `"corchea"` `"semicorchea"` `"fusa"` |
+| Alteraciones y puntillo | `"#"` `"b"` `"."` |
+| Operadores relacionales | `">"` `"<"` `">="` `"<="` `"="` `"<>"` |
+| Operadores aritméticos | `"+"` `"-"` `"*"` `"/"` |
 | Booleanos | `"true"` `"false"` |
-| Símbolos | `"("` `")"` `"{"` `"}"` `"["` `"]"` `":"` `"#"` `"b"` `"."` `"_"` `" "` `'"'` |
-| Átomos | `"a"` … `"z"` · `"A"` … `"Z"` · `"0"` … `"9"` · `"↵"` |
+| Símbolos | `"("` `")"` `"{"` `"}"` `"["` `"]"` `":"` `"_"` `" "` `'"'` `"↵"` |
+| Átomos | `"a … z"` `"A … Z"` `"0 … 9"` |
+
+`tempo`, `compas` y `tonalidad` no son terminales sino variables: la cabecera las fija y las reglas las consultan. La lista completa de los 72 términos reservados del lenguaje extendido está en la sección 5.
 
 **Ejemplo mínimo** — el evento `do4:negra`:
 
 ```
-<evento> → <nota> ":" <figura>
-<nota>   → do <octava> → do 4
-<figura> → negra
+<evento> (8)
+  <nota> (9)  → "do" "4"
+  ":"
+  <figura> (12)
+    <nombre_figura> (13)
+      "negra"
 ```
 
-`<evento>`, `<nota>`, `<octava>` y `<figura>` tienen ángulos: se abren en algo más. `do`, `4`, `:` y `negra` ya no se abren: son terminales.
+Todo lo que tiene ángulos se abre en algo más; `"do"`, `"4"`, `":"` y `"negra"` ya no: son las hojas, son terminales.
 
 ---
 
@@ -395,16 +445,17 @@ AL (es_coda O es_final) Y NO tiene_percusion TOCAR tempo = tempo - 10
 
 | Paso | Se aplica | Queda |
 |---|---|---|
-| 1 | `<regla>` | `AL <expresion> TOCAR <acciones>` |
-| 2 | `<expresion>` → un solo `<termino>` | `AL <termino> TOCAR <acciones>` |
-| 3 | `<termino>` → `<factor> Y <factor>` | `AL <factor> Y <factor> TOCAR <acciones>` |
-| 4 | 1.er `<factor>` → `"(" <expresion> ")"` | `AL ( <expresion> ) Y <factor> …` |
-| 5 | esa `<expresion>` → `<termino> O <termino>` → `<variable>` cada uno | `AL ( es_coda O es_final ) Y <factor> …` |
-| 6 | 2.º `<factor>` → `NO <factor>` → `<variable>` | `… Y NO tiene_percusion TOCAR <acciones>` |
-| 7 | `<acciones>` → `<accion>` → `<variable> "=" <operando>` | `… TOCAR tempo = <operando>` |
-| 8 | `<operando>` → `<operando> <op_aritmetico> <operando>` → `<variable>` `-` `<valor>` | `… TOCAR tempo = tempo - 10` |
+| 1 | `<regla>` (14) | `"AL" <expresion> "TOCAR" <acciones> <nl>` |
+| 2 | `<expresion>` (15) → un solo `<termino>` | `"AL" <termino> "TOCAR" <acciones> <nl>` |
+| 3 | `<termino>` (16) → `<factor> "Y" <factor>` | `"AL" <factor> "Y" <factor> "TOCAR" <acciones> <nl>` |
+| 4 | 1.er `<factor>` (17) → `"(" <expresion> ")"` | `"AL" "(" <expresion> ")" "Y" <factor> …` |
+| 5 | esa `<expresion>` → `<termino> "O" <termino>` → `<variable>` cada uno | `"AL" "(" es_coda "O" es_final ")" "Y" <factor> …` |
+| 6 | 2.º `<factor>` → `"NO" <factor>` → `<variable>` | `… "Y" "NO" tiene_percusion "TOCAR" <acciones> <nl>` |
+| 7 | `<acciones>` (23) → `<accion>` (24) → `<variable> "=" <operando>` | `… "TOCAR" tempo "=" <operando> <nl>` |
+| 8 | `<operando>` (20) → `<sumando> "-" <sumando>` → `<primario>` (22) → `<variable>` y `<valor>` | `… "TOCAR" tempo "=" tempo "-" 10 <nl>` |
+| 9 | `<nl>` (33) → `"↵"`; cada variable y número se abre hasta `<letra>` y `<digito>` | la regla completa |
 
-Las hojas, leídas de izquierda a derecha, son la regla completa. El primer factor abre un paréntesis que vuelve a contener una expresión entera: ahí está la recursión. Y los tres niveles hacen que `NO` se resuelva antes que `Y`, y `Y` antes que `O`; sin ellos, esta regla significaría *«si es la coda, o bien si es el final sin percusión»*, que no es lo mismo.
+Las hojas, leídas de izquierda a derecha, son la regla completa. El primer factor abre un paréntesis que vuelve a contener una expresión entera: ahí está la recursión. Y los tres niveles hacen que `NO` se resuelva antes que `Y`, y `Y` antes que `O`; la aritmética baja igual por operando, sumando y primario. Sin esos niveles, esta regla significaría *«si es la coda, o bien si es el final sin percusión»*, que no es lo mismo.
 
 ---
 
@@ -440,7 +491,7 @@ Reglas + .toca  →  Lexer  →  Tokens  →  Parser  →  Motor de inferencia  
 
 ## 12 · Un programa de ejemplo
 
-*Fray Santiago* (Frère Jacques) en `.toca`, escrito solo con lo que las 31 producciones generan. La comparación línea por línea contra la gramática está en el documento aparte.
+*Fray Santiago* (Frère Jacques) en `.toca`, escrito solo con lo que las 33 producciones generan. La comparación línea por línea contra la gramática está en el documento aparte.
 
 ```
 tempo 100
@@ -484,9 +535,12 @@ Aho, A. V., Lam, M. S., Sethi, R. & Ullman, J. D. — *Compilers: Principles, Te
 | `README.md` | El lenguaje completo, las 15 reglas y la tabla de variables |
 | `reglas.txt` | Las 15 reglas en su forma oficial |
 | `REGLAS.md` | Qué hace cada regla y por qué |
-| `palabras_reservadas.md` | Los 66 términos con categoría y significado |
-| `GRAMATICA.md` | Las 31 producciones BNF, terminales y derivación |
-| `gramatica/` | Una producción por archivo, con ejemplos válidos e inválidos |
+| `palabras_reservadas.md` | Los 72 términos con categoría y significado |
+| `gramatica.md` | Las 33 producciones BNF, terminales y no terminales etiquetados, y la derivación de la regla 11 |
+| `gramatica/` | Una ficha por producción, con desglose, ejemplos y derivación |
+| `VERIFICACION-REGLAS.md` | Las 15 reglas derivadas una a una |
+| `verificar.py` | El parser que implementa las 33 producciones y produce todas las derivaciones |
+| `COMPARACION-EJEMPLO.md` | El programa de ejemplo derivado línea por línea |
 | `LibroLengujesFormales.rtf` | La consulta bibliográfica |
 | `ejemplos/frere-jacques.toca` | El programa de referencia |
 

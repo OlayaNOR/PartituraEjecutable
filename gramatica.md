@@ -1,10 +1,12 @@
-# Gramática BNF de TocaScript — una producción por archivo
+# Gramática de TocaScript en notación BNF
 
 **Grupo 8** · Valeria Alarcón · Andrew García · Nicolás Olaya
 
-33 producciones. Todos los terminales entre comillas; todo se abre hasta `<letra>`, `<digito>` y `<nl>`. Cada ficha trae la producción con todo lo que abre, cómo se lee, qué usa y quién la usa, el ejemplo válido con su árbol de derivación, un ejemplo inválido y la nota de diseño.
+Las **33 reglas de producción** que definen el lenguaje, en la convención BNF del curso: todos los terminales entre comillas y todo no terminal abierto hasta los átomos. Una ficha por producción en [`gramatica/`](gramatica/README.md); la verificación de las 15 reglas de `reglas.txt` en [`VERIFICACION-REGLAS.md`](VERIFICACION-REGLAS.md).
 
-## Convención
+---
+
+## Convención de notación
 
 | Símbolo | Significado |
 |---|---|
@@ -20,7 +22,20 @@
 | `#` | Comentario dentro del bloque: las etiquetas de terminales y no terminales, y las restricciones que el BNF no puede expresar (la de `<identificador>`) |
 | líneas en blanco y comentarios | En un programa, las líneas en blanco y los comentarios (`#` al inicio de la línea o tras un espacio, hasta el fin de la línea) los descarta el lexer antes del análisis; no forman parte de la gramática. `#` pegado a una nota es el sostenido, `fa#4` |
 
-## La gramática completa
+> [!IMPORTANT]
+> **Por qué todos los terminales van entre comillas**
+>
+> TocaScript usa llaves y corchetes **como parte de su sintaxis real**: `motivo frase1 { … }`, `[do4 mi4 sol4]`. Escritos sin marcar, no habría forma de saber si `{ }` significa «repetición» o «aquí va una llave». Por eso todo lo que se teclea va entre comillas —`"{"` es una llave del programa; `{ }` sin comillas es repetición— y, por coherencia, también las palabras clave: `"AL"`, `"motivo"`, `"do"`. La comilla doble como terminal se escribe `'"'`.
+
+> **El criterio de terminal:** terminal es lo que no lleva ángulos `< >`; no terminal es lo que los lleva y se abre en otra producción. **El lexer solo necesita reconocer los terminales.**
+
+Los nombres de los no terminales van sin tildes (`<condicion>`, `<accion>`), para que el lexer no dependa de la codificación del archivo.
+
+---
+
+## Las 33 producciones
+
+Terminales y no terminales etiquetados como comentario al inicio del bloque.
 
 ```
 # ═══════════════════════════════════════════════════════════════
@@ -108,40 +123,106 @@
 33  <nl> ::= "↵"
 ```
 
-## Índice
+---
 
-| # | Producción | Grupo | Archivo |
-|---|---|---|---|
-| 1 | `<programa>` | Estructura del archivo | [01-programa.md](01-programa.md) |
-| 2 | `<cabecera>` | Estructura del archivo | [02-cabecera.md](02-cabecera.md) |
-| 3 | `<ajuste>` | Estructura del archivo | [03-ajuste.md](03-ajuste.md) |
-| 4 | `<pieza>` | Estructura del archivo | [04-pieza.md](04-pieza.md) |
-| 5 | `<motivo>` | Estructura del archivo | [05-motivo.md](05-motivo.md) |
-| 6 | `<seccion>` | Estructura del archivo | [06-seccion.md](06-seccion.md) |
-| 7 | `<tipo_seccion>` | Estructura del archivo | [07-tipo-seccion.md](07-tipo-seccion.md) |
-| 8 | `<evento>` | La música | [08-evento.md](08-evento.md) |
-| 9 | `<nota>` | La música | [09-nota.md](09-nota.md) |
-| 10 | `<nombre_nota>` | La música | [10-nombre-nota.md](10-nombre-nota.md) |
-| 11 | `<octava>` | La música | [11-octava.md](11-octava.md) |
-| 12 | `<figura>` | La música | [12-figura.md](12-figura.md) |
-| 13 | `<nombre_figura>` | La música | [13-nombre-figura.md](13-nombre-figura.md) |
-| 14 | `<regla>` | La regla de interpretación | [14-regla.md](14-regla.md) |
-| 15 | `<expresion>` | La regla de interpretación | [15-expresion.md](15-expresion.md) |
-| 16 | `<termino>` | La regla de interpretación | [16-termino.md](16-termino.md) |
-| 17 | `<factor>` | La regla de interpretación | [17-factor.md](17-factor.md) |
-| 18 | `<condicion>` | La regla de interpretación | [18-condicion.md](18-condicion.md) |
-| 19 | `<operador>` | La regla de interpretación | [19-operador.md](19-operador.md) |
-| 20 | `<operando>` | La regla de interpretación | [20-operando.md](20-operando.md) |
-| 21 | `<sumando>` | La regla de interpretación | [21-sumando.md](21-sumando.md) |
-| 22 | `<primario>` | La regla de interpretación | [22-primario.md](22-primario.md) |
-| 23 | `<acciones>` | La regla de interpretación | [23-acciones.md](23-acciones.md) |
-| 24 | `<accion>` | La regla de interpretación | [24-accion.md](24-accion.md) |
-| 25 | `<variable>` | Nombres y valores | [25-variable.md](25-variable.md) |
-| 26 | `<identificador>` | Nombres y valores | [26-identificador.md](26-identificador.md) |
-| 27 | `<valor>` | Nombres y valores | [27-valor.md](27-valor.md) |
-| 28 | `<numero>` | Nombres y valores | [28-numero.md](28-numero.md) |
-| 29 | `<texto>` | Nombres y valores | [29-texto.md](29-texto.md) |
-| 30 | `<letra>` | Átomos | [30-letra.md](30-letra.md) |
-| 31 | `<mayuscula>` | Átomos | [31-mayuscula.md](31-mayuscula.md) |
-| 32 | `<digito>` | Átomos | [32-digito.md](32-digito.md) |
-| 33 | `<nl>` | Átomos | [33-nl.md](33-nl.md) |
+## Terminales y no terminales
+
+### No terminales — 33
+
+Uno por cada producción; todos se abren en otra:
+
+`<programa>` · `<cabecera>` · `<ajuste>` · `<pieza>` · `<motivo>` · `<seccion>` · `<tipo_seccion>` · `<evento>` · `<nota>` · `<nombre_nota>` · `<octava>` · `<figura>` · `<nombre_figura>` · `<regla>` · `<expresion>` · `<termino>` · `<factor>` · `<condicion>` · `<operador>` · `<operando>` · `<sumando>` · `<primario>` · `<acciones>` · `<accion>` · `<variable>` · `<identificador>` · `<valor>` · `<numero>` · `<texto>` · `<letra>` · `<mayuscula>` · `<digito>` · `<nl>`
+
+### Terminales
+
+Todo lo que va entre comillas en la gramática. Ahí termina la derivación, y son lo único que el lexer necesita reconocer:
+
+| Categoría | Terminales |
+|---|---|
+| Palabras clave de la regla | `"AL"` `"TOCAR"` `"Y"` `"O"` `"NO"` |
+| Palabras clave de la pieza | `"motivo"` `"seccion"` `"tipo"` `"pieza"` `"silencio"` |
+| Tipos de sección | `"intro"` `"estrofa"` `"estribillo"` `"coda"` |
+| Nombres de nota | `"do"` `"re"` `"mi"` `"fa"` `"sol"` `"la"` `"si"` |
+| Figuras | `"redonda"` `"blanca"` `"negra"` `"corchea"` `"semicorchea"` `"fusa"` |
+| Alteraciones y puntillo | `"#"` `"b"` `"."` |
+| Operadores relacionales | `">"` `"<"` `">="` `"<="` `"="` `"<>"` |
+| Operadores aritméticos | `"+"` `"-"` `"*"` `"/"` |
+| Booleanos | `"true"` `"false"` |
+| Símbolos | `"("` `")"` `"{"` `"}"` `"["` `"]"` `":"` `"_"` `" "` `'"'` `"↵"` |
+| Átomos | `"a … z"` `"A … Z"` `"0 … 9"` |
+
+`tempo`, `compas` y `tonalidad` **no** son terminales: son variables (`<variable>` → `<identificador>`) que la cabecera fija y las reglas consultan. Los 72 términos reservados del lenguaje completo (incluido lo que no entra en este parcial: voces, `repetir`, `exportar`) están en [`palabras_reservadas.md`](palabras_reservadas.md).
+
+---
+
+## Verificación regla por regla
+
+Las 15 reglas de `reglas.txt` se derivaron una a una con un parser (`verificar.py`) que implementa estas 33 producciones: **15 de 15 generadas**. La primera pasada falló en cinco (R1, R2, R8, R11, R15) porque la cabecera declaraba `"tempo"` y `"compas"` como palabras clave y las reglas los usan como variables; se ajustó la gramática —la cabecera pasó a ser tres `<ajuste> ::= <variable> <valor>`— y no las reglas. Detalle, tokens y árbol de cada regla en [`VERIFICACION-REGLAS.md`](VERIFICACION-REGLAS.md).
+
+## Cómo se deriva una regla real
+
+La regla 11, la que más construcciones usa a la vez — paréntesis, `O`, `Y`, `NO` y aritmética:
+
+```
+AL (es_coda O es_final) Y NO tiene_percusion TOCAR tempo = tempo - 10
+```
+
+```
+<regla> (14)
+  "AL"
+  <expresion> (15)
+    <termino> (16)
+      <factor> (17)
+        "("
+        <expresion> (15)
+          <termino> (16)
+            <factor> (17)
+              <variable> (25)
+                <identificador> (26)  → "e" "s" "_" "c" "o" "d" "a"
+          "O"
+          <termino> (16)
+            <factor> (17)
+              <variable> (25)
+                <identificador> (26)  → "e" "s" "_" "f" "i" "n" "a" "l"
+        ")"
+      "Y"
+      <factor> (17)
+        "NO"
+        <factor> (17)
+          <variable> (25)
+            <identificador> (26)  → "t" "i" "e" "n" "e" "_" "p" "e" "r" "c" "u" "s" "i" "o" "n"
+  "TOCAR"
+  <acciones> (23)
+    <accion> (24)
+      <variable> (25)
+        <identificador> (26)  → "t" "e" "m" "p" "o"
+      "="
+      <operando> (20)
+        <sumando> (21)
+          <primario> (22)
+            <variable> (25)
+              <identificador> (26)  → "t" "e" "m" "p" "o"
+        "-"
+        <sumando> (21)
+          <primario> (22)
+            <valor> (27)
+              <numero> (28)  → "1" "0"
+  <nl> (33)  → "↵"
+```
+
+Los tres niveles `<expresion>` → `<termino>` → `<factor>` **no son decoración**: codifican la precedencia sin reglas aparte. `NO` liga más fuerte que `Y`, y `Y` más que `O`. Sin los paréntesis, `Y` se agruparía antes que `O` y la regla diría *«si es la coda, o bien si es el final sin percusión»*, que no es lo mismo.
+
+---
+
+## Relación con el resto del repositorio
+
+| Archivo | Qué aporta |
+|---|---|
+| [`reglas.txt`](reglas.txt) | Las 15 reglas de interpretación: instancias de `<regla>` |
+| [`VERIFICACION-REGLAS.md`](VERIFICACION-REGLAS.md) | Las 15 derivadas una a una |
+| [`gramatica/`](gramatica/README.md) | Una ficha por producción, con desglose, ejemplos y derivación |
+| [`palabras_reservadas.md`](palabras_reservadas.md) | Los 72 términos reservados del lenguaje completo |
+| [`COMPARACION-EJEMPLO.md`](COMPARACION-EJEMPLO.md) | El programa de ejemplo derivado línea por línea |
+| [`DOCUMENTO.md`](DOCUMENTO.md) | Todo el lenguaje en un solo sitio |
+
+*Grupo 8 · Lenguajes Formales · Prof. David Cano Baquero*

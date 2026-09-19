@@ -24,40 +24,31 @@ Los archivos del lenguaje usan la extensión **`.toca`**.
 # Sintaxis general de una regla:
 # AL <condicion> [Y|O <condicion>] TOCAR <accion>
 #
-# <condicion>  ::= <variable> <operador> <valor>
+# <condicion>  ::= <operando> <operador> <operando>
+# <operando>   ::= <variable> | <valor> | <operando> (+|-|*|/) <operando>
 # <operador>   ::= > | < | = | >= | <= | <>
 # <variable>   ::= identificador en minusculas con guion_bajo
 # <valor>      ::= numero (entero o decimal) | true | false | "texto"
 # <accion>     ::= identificador en minusculas con guion_bajo
-#                | <variable> = <valor>
+#                | <variable> = <operando>
 ```
 
 ### Gramática completa
 
+La gramática entera, en BNF y con todos los terminales entre comillas, está en [`gramatica.md`](gramatica.md): **33 producciones**, abiertas hasta `<letra>`, `<digito>` y el salto de línea, con terminales y no terminales etiquetados como comentario. La regla es su producción 14:
+
 ```
-<regla>       ::= AL <expresion> TOCAR <acciones>
-
-<expresion>   ::= <termino> [ O <termino> ]*
-<termino>     ::= <factor> [ Y <factor> ]*
-<factor>      ::= NO <factor>
-                | ( <expresion> )
-                | <condicion>
-                | <variable>
-
-<condicion>   ::= <operando> <operador> <operando>
-<operador>    ::= > | < | = | >= | <= | <>
-<operando>    ::= <variable> | <valor> | <aritmetica>
-<aritmetica>  ::= <operando> ( + | - | * | / ) <operando>
-
-<acciones>    ::= <accion> [ Y <accion> ]*
-<accion>      ::= <variable> = <operando>
-                | identificador_en_minusculas
-
-<variable>    ::= identificador_en_minusculas
-<valor>       ::= numero | true | false | "texto"
+<regla>     ::= "AL" <expresion> "TOCAR" <acciones> <nl>
+<expresion> ::= <termino> { "O" <termino> }
+<termino>   ::= <factor> { "Y" <factor> }
+<factor>    ::= "NO" <factor> | "(" <expresion> ")" | <condicion> | <variable>
+<condicion> ::= <operando> <operador> <operando>
+<operando>  ::= <sumando> { "+" <sumando> | "-" <sumando> }
+<sumando>   ::= <primario> { "*" <primario> | "/" <primario> }
+<primario>  ::= <variable> | <valor> | "(" <operando> ")"
 ```
 
-La gramática de `<expresion>` está escrita en tres niveles —`expresion`, `termino`, `factor`— porque así queda codificada la precedencia sin necesidad de reglas aparte: `NO` liga más fuerte que `Y`, y `Y` más fuerte que `O`.
+La gramática de `<expresion>` está escrita en tres niveles —`expresion`, `termino`, `factor`— porque así queda codificada la precedencia sin necesidad de reglas aparte: `NO` liga más fuerte que `Y`, y `Y` más fuerte que `O`. La aritmética usa la misma técnica, `operando` → `sumando` → `primario`, y por eso `*` y `/` van antes que `+` y `-`. Las 15 reglas de `reglas.txt` están derivadas una a una contra esta gramática en [`VERIFICACION-REGLAS.md`](VERIFICACION-REGLAS.md).
 
 ### Por qué estas palabras clave
 
@@ -90,11 +81,11 @@ La gramática de `<expresion>` está escrita en tres niveles —`expresion`, `te
 | Comentarios | empiezan con `#` | `# R1 - acento fuerte` |
 | Formato | una regla por línea | ver abajo |
 
-**Precedencia**, de más fuerte a más débil: `NO` → comparaciones → `Y` → `O`. Los paréntesis siempre mandan.
+**Precedencia**, de más fuerte a más débil: `*` `/` → `+` `-` → comparaciones → `NO` → `Y` → `O`. Los paréntesis siempre mandan.
 
 **El lenguaje distingue mayúsculas de minúsculas**, y esa distinción hace trabajo: las palabras de las reglas van en mayúsculas y las de la pieza en minúsculas, así se separan de un vistazo y nunca chocan entre sí.
 
-Los **73 términos reservados** del lenguaje —palabras clave, operadores, delimitadores, figuras y notas— están documentados uno por uno, con su categoría y significado, en [`palabras_reservadas.md`](palabras_reservadas.md). Ahí están también las convenciones léxicas: qué forma tiene un identificador, un número, un literal de texto o una nota.
+Los **72 términos reservados** del lenguaje —palabras clave, operadores, delimitadores, figuras y notas— están documentados uno por uno, con su categoría y significado, en [`palabras_reservadas.md`](palabras_reservadas.md). Ahí están también las convenciones léxicas: qué forma tiene un identificador, un número, un literal de texto o una nota.
 
 ---
 
@@ -254,15 +245,17 @@ El recorrido completo, compás a compás, está en [`REGLAS.md`](REGLAS.md).
 ```
 PartituraEjecutable/
 ├── README.md                  ← este archivo: el lenguaje, las 15 reglas y las variables
-├── reglas.txt                 ← las 15 reglas en su forma oficial
+├── reglas.txt                 ← las 15 reglas en su forma oficial, con la sintaxis general como comentario
 ├── REGLAS.md                  ← qué hace cada regla y por qué
-├── palabras_reservadas.md     ← los 66 términos reservados, con categoría y significado
-├── GRAMATICA.md               ← las 31 producciones BNF, convención, terminales y derivación
-├── gramatica/                 ← una producción por archivo, con desglose y ejemplos
+├── palabras_reservadas.md     ← los 72 términos reservados, con categoría y significado
+├── gramatica.md               ← las 33 producciones BNF, con terminales y no terminales etiquetados
+├── gramatica/                 ← una ficha por producción: desglose, derivación, ejemplo inválido
+├── VERIFICACION-REGLAS.md     ← las 15 reglas derivadas una a una contra la gramática
+├── verificar.py               ← el parser que implementa las 33 producciones y hace la verificación
 ├── DOCUMENTO.md               ← documento general: todo lo anterior en un solo sitio
 ├── COMPARACION-EJEMPLO.md     ← el programa de ejemplo derivado línea por línea
-├── BIBLIOGRAFIA.md            ← la consulta bibliográfica (libro del dragón)
-└── ejemplos/                  ← frere-jacques.toca y su partitura
+├── BIBLIOGRAFIA.md            ← la consulta bibliográfica
+└── ejemplos/                  ← programas de ejemplo
 ```
 
 ---

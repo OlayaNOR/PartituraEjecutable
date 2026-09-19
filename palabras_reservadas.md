@@ -22,7 +22,7 @@ Antes de la lista, las reglas que gobiernan cómo se escribe cualquier cosa en e
 | Elemento | Regla | Ejemplos válidos | Inválidos |
 |---|---|---|---|
 | **Identificador** | Empieza por letra minúscula, sigue con letras, dígitos o guion bajo | `tempo`, `compas_actual`, `frase1` | `Tempo`, `_x`, `2voces` |
-| **Número entero** | Uno o más dígitos, con signo opcional | `96`, `-12`, `+5` | `1.` |
+| **Número entero** | Uno o más dígitos, sin signo: el `-` es siempre un operador | `96`, `140` | `-12`, `1.` |
 | **Número decimal** | Dígitos, punto, dígitos | `0.85`, `4.5` | `.5`, `0,85` |
 | **Texto** | Entre comillas dobles, sin saltos de línea | `"ff"`, `"Do mayor"` | `'ff'` |
 | **Booleano** | Solo dos valores | `true`, `false` | `verdadero`, `TRUE` |
@@ -114,11 +114,13 @@ De más fuerte a más débil:
 1.  ( )                        agrupación
 2.  * /                        multiplicación y división
 3.  + -                        suma y resta
-4.  NO                         negación
-5.  >  <  =  >=  <=  <>        comparaciones
+4.  >  <  =  >=  <=  <>        comparaciones
+5.  NO                         negación
 6.  Y                          conjunción
 7.  O                          disyunción
 ```
+
+La gramática (`gramatica.md`) codifica este orden con niveles, sin reglas aparte: `<operando>` → `<sumando>` → `<primario>` para la aritmética, y `<expresion>` → `<termino>` → `<factor>` para la lógica. `NO` se aplica a un `<factor>`, que puede ser una comparación completa; por eso la comparación va antes que la negación.
 
 **Por qué importa.** La regla 11 se escribe así:
 

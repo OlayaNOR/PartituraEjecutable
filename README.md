@@ -253,10 +253,16 @@ El recorrido completo, compás a compás, está en [`REGLAS.md`](REGLAS.md).
 
 ```
 PartituraEjecutable/
-├── README.md                  ← este archivo
+├── README.md                  ← este archivo: el lenguaje, las 15 reglas y las variables
 ├── reglas.txt                 ← las 15 reglas en su forma oficial
-├── palabras_reservadas.md     ← palabras reservadas, significado y categoría
-└── REGLAS.md                  ← explicación detallada de cada regla
+├── REGLAS.md                  ← qué hace cada regla y por qué
+├── palabras_reservadas.md     ← los 66 términos reservados, con categoría y significado
+├── GRAMATICA.md               ← las 31 producciones BNF, convención, terminales y derivación
+├── gramatica/                 ← una producción por archivo, con desglose y ejemplos
+├── DOCUMENTO.md               ← documento general: todo lo anterior en un solo sitio
+├── COMPARACION-EJEMPLO.md     ← el programa de ejemplo derivado línea por línea
+├── BIBLIOGRAFIA.md            ← la consulta bibliográfica (libro del dragón)
+└── ejemplos/                  ← frere-jacques.toca y su partitura
 ```
 
 ---

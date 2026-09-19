@@ -2,7 +2,7 @@
 
 **Grupo 8** · Valeria Alarcón · Andrew García · Nicolás Olaya
 
-Las **20 reglas de producción** que definen el lenguaje, escritas en la convención BNF que el
+Las **31 reglas de producción** que definen el lenguaje, escritas en la convención BNF que el
 profesor presentó en la clase del 11 de septiembre.
 
 ---
@@ -13,18 +13,18 @@ El profesor dejó la convención abierta, pero exigió que fuera consistente:
 
 > «Ejemplo de convención a adoptar (pueden variar ligeramente, **pero deben ser consistentes**).»
 
-Ésta es la nuestra, y se aplica igual en las 20 reglas:
+Ésta es la nuestra, y se aplica igual en las 31 reglas:
 
 | Símbolo | Significado |
 |---|---|
-| `<nombre>` | **No terminal** — hay otra regla que lo explica |
-| `nombre` (sin ángulos) | **Terminal** — ahí se acaba la derivación |
+| `<nombre>` | **No terminal**: se abre en otra producción |
+| `"x"` | **Terminal**: se escribe tal cual en el programa. Todos los terminales van entre comillas dobles — palabras clave, símbolos, letras y dígitos |
+| `'"'` | La comilla doble como terminal, entre comillas simples porque las dobles ya marcan los demás terminales |
 | `::=` | «se define como» |
-| `\|` | alternativa: una u otra |
-| `[ ... ]` | opcional: cero o una vez |
-| `{ ... }` | repetición: cero o más veces |
-| `" ... "` | **símbolo literal** del lenguaje, no meta-símbolo |
-| `# ...` | comentario |
+| `\|` | Alternativa |
+| `{ … }` | Repetición: cero o más veces |
+| `[ … ]` | Opcional: cero o una vez |
+| `<nl>` | Salto de línea. Fuera de llaves cada construcción termina en uno; dentro de `{ }` los saltos cuentan como espacio |
 
 > [!IMPORTANT]
 > **Por qué hacen falta las comillas**
@@ -47,91 +47,55 @@ para que el lexer no tenga que lidiar con caracteres acentuados en los identific
 
 ---
 
-## Las 20 reglas de producción
+## Las 31 producciones
+
+Todos los terminales van entre comillas dobles y todo no terminal se abre hasta `<letra>`, `<digito>` y `<nl>`. Cada producción tiene su archivo en [`gramatica/`](gramatica/README.md), con ejemplo válido e inválido.
 
 ```
-# ═══════════════════════════════════════════════════════════
-#  GRAMÁTICA DE TocaScript  ·  Grupo 8  ·  Notación BNF
-# ═══════════════════════════════════════════════════════════
-#
-#  <x>   no terminal        x    terminal
-#  ::=   se define como     |    alternativa
-#  [ ]   opcional           { }  cero o más veces
-#  "x"   simbolo literal del lenguaje (no meta-simbolo)
-#
-# ───────────────────────────────────────────────────────────
-#  BLOQUE A · La regla de interpretación          (8 reglas)
-# ───────────────────────────────────────────────────────────
-#
-#  Sintaxis general de una regla:
-#  AL <condicion> [Y|O <condicion>] TOCAR <accion>
-#
-#  1  <regla>      ::= AL <expresion> TOCAR <acciones>
-#
-#  2  <expresion>  ::= <termino> { O <termino> }
-#
-#  3  <termino>    ::= <factor> { Y <factor> }
-#
-#  4  <factor>     ::= NO <factor>
-#                    | "(" <expresion> ")"
-#                    | <condicion>
-#                    | <variable>
-#
-#  5  <condicion>  ::= <operando> <operador> <operando>
-#
-#  6  <operando>   ::= <variable>
-#                    | <valor>
-#                    | <operando> <op_aritmetico> <operando>
-#
-#  7  <acciones>   ::= <accion> { Y <accion> }
-#
-#  8  <accion>     ::= <variable> "=" <operando>
-#                    | <identificador>
-#
-# ───────────────────────────────────────────────────────────
-#  BLOQUE B · Operadores y valores                (4 reglas)
-# ───────────────────────────────────────────────────────────
-#
-#  9  <operador>      ::= > | < | >= | <= | = | <>
-#
-# 10  <op_aritmetico> ::= + | - | * | /
-#
-# 11  <variable>      ::= identificador en minusculas con guion_bajo
-#
-# 12  <valor>         ::= <numero> | true | false | <texto>
-#
-# ───────────────────────────────────────────────────────────
-#  BLOQUE C · El programa                         (3 reglas)
-# ───────────────────────────────────────────────────────────
-#
-# 13  <programa>  ::= <cabecera> { <motivo> | <seccion> | <regla> } <pieza>
-#
-# 14  <cabecera>  ::= tempo <numero>
-#                     compas <texto>
-#                     tonalidad <texto>
-#
-# 15  <pieza>     ::= pieza <texto> "{" { <identificador> } "}"
-#
-# ───────────────────────────────────────────────────────────
-#  BLOQUE D · La música                           (5 reglas)
-# ───────────────────────────────────────────────────────────
-#
-# 16  <motivo>   ::= motivo <identificador> "{" { <evento> } "}"
-#
-# 17  <seccion>  ::= seccion <identificador> tipo <tipo_seccion>
-#                    "{" { <evento> | <identificador> } "}"
-#
-# 18  <evento>   ::= <nota> ":" <figura>
-#                  | "[" <nota> { <nota> } "]" ":" <figura>
-#                  | silencio ":" <figura>
-#
-# 19  <nota>     ::= ( do | re | mi | fa | sol | la | si )
-#                    [ "#" | "b" ] <octava>
-#
-# 20  <figura>   ::= ( redonda | blanca | negra
-#                    | corchea | semicorchea | fusa ) [ "." ]
-#
-# ═══════════════════════════════════════════════════════════
+
+# ── Estructura del archivo ──
+ 1  <programa> ::= <cabecera> { <motivo> | <seccion> | <regla> } <pieza>
+ 2  <cabecera> ::= "tempo" <numero> <nl>
+                   "compas" <texto> <nl>
+                   "tonalidad" <texto> <nl>
+ 3  <pieza> ::= "pieza" <texto> "{" { <identificador> } "}" <nl>
+ 4  <motivo> ::= "motivo" <identificador> "{" { <evento> } "}" <nl>
+ 5  <seccion> ::= "seccion" <identificador> "tipo" <tipo_seccion>
+                  "{" { <evento> | <identificador> } "}" <nl>
+ 6  <tipo_seccion> ::= "intro" | "estrofa" | "estribillo" | "coda"
+
+# ── La música ──
+ 7  <evento> ::= <nota> ":" <figura> | "[" <nota> { <nota> } "]" ":" <figura> | "silencio" ":" <figura>
+ 8  <nota> ::= <nombre_nota> [ "#" | "b" ] <octava>
+ 9  <nombre_nota> ::= "do" | "re" | "mi" | "fa" | "sol" | "la" | "si"
+10  <octava> ::= <digito>
+11  <figura> ::= <nombre_figura> [ "." ]
+12  <nombre_figura> ::= "redonda" | "blanca" | "negra" | "corchea" | "semicorchea" | "fusa"
+
+# ── La regla de interpretación ──
+13  <regla> ::= "AL" <expresion> "TOCAR" <acciones> <nl>
+14  <expresion> ::= <termino> { "O" <termino> }
+15  <termino> ::= <factor> { "Y" <factor> }
+16  <factor> ::= "NO" <factor> | "(" <expresion> ")" | <condicion> | <variable>
+17  <condicion> ::= <operando> <operador> <operando>
+18  <operador> ::= ">" | "<" | ">=" | "<=" | "=" | "<>"
+19  <operando> ::= <variable> | <valor> | <operando> <op_aritmetico> <operando>
+20  <op_aritmetico> ::= "+" | "-" | "*" | "/"
+21  <acciones> ::= <accion> { "Y" <accion> }
+22  <accion> ::= <variable> "=" <operando> | <identificador>
+
+# ── Nombres y valores ──
+23  <variable> ::= <identificador>
+24  <identificador> ::= <letra> { <letra> | <digito> | "_" }
+25  <valor> ::= <numero> | "true" | "false" | <texto>
+26  <numero> ::= <digito> { <digito> } [ "." <digito> { <digito> } ]
+27  <texto> ::= '"' { <letra> | <mayuscula> | <digito> | " " | "/" } '"'
+
+# ── Átomos ──
+28  <letra> ::= "a" | "b" | "c" | "..." | "z"
+29  <mayuscula> ::= "A" | "B" | "C" | "..." | "Z"
+30  <digito> ::= "0" | "1" | "2" | "..." | "9"
+31  <nl> ::= "↵"
 ```
 
 ---

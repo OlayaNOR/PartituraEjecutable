@@ -22,7 +22,6 @@ La producción `<operando>` y, debajo, todas las que abre hasta llegar a los át
 29  <texto> ::= '"' { <letra> | <mayuscula> | <digito> | " " | "/" } '"'
 31  <mayuscula> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M"
                   | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
-20  <operando> ::= <sumando> { "+" <sumando> | "-" <sumando> }
 ```
 
 ## Cómo se lee

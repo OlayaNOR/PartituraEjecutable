@@ -14,10 +14,6 @@ La producción `<factor>` y, debajo, todas las que abre hasta llegar a los átom
 
 15  <expresion> ::= <termino> { "O" <termino> }
 16  <termino> ::= <factor> { "Y" <factor> }
-17  <factor> ::= "NO" <factor>
-               | "(" <expresion> ")"
-               | <condicion>
-               | <variable>
 18  <condicion> ::= <operando> <operador> <operando>
 20  <operando> ::= <sumando> { "+" <sumando> | "-" <sumando> }
 21  <sumando> ::= <primario> { "*" <primario> | "/" <primario> }

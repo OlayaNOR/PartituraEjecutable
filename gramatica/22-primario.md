@@ -22,7 +22,6 @@ La producción `<primario>` y, debajo, todas las que abre hasta llegar a los át
                   | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 20  <operando> ::= <sumando> { "+" <sumando> | "-" <sumando> }
 21  <sumando> ::= <primario> { "*" <primario> | "/" <primario> }
-22  <primario> ::= <variable> | <valor> | "(" <operando> ")"
 ```
 
 ## Cómo se lee

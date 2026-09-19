@@ -14,7 +14,6 @@ La producción `<expresion>` y, debajo, todas las que abre hasta llegar a los á
                | "(" <expresion> ")"
                | <condicion>
                | <variable>
-15  <expresion> ::= <termino> { "O" <termino> }
 18  <condicion> ::= <operando> <operador> <operando>
 20  <operando> ::= <sumando> { "+" <sumando> | "-" <sumando> }
 21  <sumando> ::= <primario> { "*" <primario> | "/" <primario> }

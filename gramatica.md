@@ -55,6 +55,7 @@ Terminales y no terminales etiquetados como comentario al inicio del bloque.
 #
 #  TERMINALES — van entre comillas; ahí termina la derivación y son lo que el lexer reconoce:
 #    Palabras clave de la regla  "AL" "TOCAR" "Y" "O" "NO"
+#    Impresión (acción)          "mostrar"
 #    Palabras clave de la pieza  "motivo" "seccion" "tipo" "pieza" "silencio"
 #    Tipos de sección            "intro" "estrofa" "estribillo" "coda"
 #    Nombres de nota             "do" "re" "mi" "fa" "sol" "la" "si"
@@ -72,6 +73,7 @@ Terminales y no terminales etiquetados como comentario al inicio del bloque.
  2  <cabecera> ::= <ajuste> <nl>
                    <ajuste> <nl>
                    <ajuste> <nl>
+                   { <ajuste> <nl> }
  3  <ajuste> ::= <variable> <valor>
  4  <pieza> ::= "pieza" <texto> "{" { <identificador> } "}" <nl>
  5  <motivo> ::= "motivo" <identificador> "{" { <evento> } "}" <nl>
@@ -104,6 +106,7 @@ Terminales y no terminales etiquetados como comentario al inicio del bloque.
 22  <primario> ::= <variable> | <valor> | "(" <operando> ")"
 23  <acciones> ::= <accion> { "Y" <accion> }
 24  <accion> ::= <variable> "=" <operando>
+               | "mostrar" <operando>
                | <identificador>
 
 # ── Nombres y valores ──
@@ -140,6 +143,7 @@ Todo lo que va entre comillas en la gramática. Ahí termina la derivación, y s
 | Categoría | Terminales |
 |---|---|
 | Palabras clave de la regla | `"AL"` `"TOCAR"` `"Y"` `"O"` `"NO"` |
+| Impresión (acción) | `"mostrar"` |
 | Palabras clave de la pieza | `"motivo"` `"seccion"` `"tipo"` `"pieza"` `"silencio"` |
 | Tipos de sección | `"intro"` `"estrofa"` `"estribillo"` `"coda"` |
 | Nombres de nota | `"do"` `"re"` `"mi"` `"fa"` `"sol"` `"la"` `"si"` |
@@ -151,7 +155,7 @@ Todo lo que va entre comillas en la gramática. Ahí termina la derivación, y s
 | Símbolos | `"("` `")"` `"{"` `"}"` `"["` `"]"` `":"` `"_"` `" "` `'"'` `"↵"` |
 | Átomos | `"a … z"` `"A … Z"` `"0 … 9"` |
 
-`tempo`, `compas` y `tonalidad` **no** son terminales: son variables (`<variable>` → `<identificador>`) que la cabecera fija y las reglas consultan. Los 72 términos reservados del lenguaje completo (incluido lo que no entra en este parcial: voces, `repetir`, `exportar`) están en [`palabras_reservadas.md`](palabras_reservadas.md).
+`tempo`, `compas` y `tonalidad` **no** son terminales: son variables (`<variable>` → `<identificador>`) que la cabecera fija y las reglas consultan. Los 73 términos reservados del lenguaje completo (incluido lo que no entra en este parcial: voces, `repetir`, `exportar`) están en [`palabras_reservadas.md`](palabras_reservadas.md).
 
 ---
 
@@ -221,7 +225,7 @@ Los tres niveles `<expresion>` → `<termino>` → `<factor>` **no son decoraci�
 | [`reglas.txt`](reglas.txt) | Las 15 reglas de interpretación: instancias de `<regla>` |
 | [`VERIFICACION-REGLAS.md`](VERIFICACION-REGLAS.md) | Las 15 derivadas una a una |
 | [`gramatica/`](gramatica/README.md) | Una ficha por producción, con desglose, ejemplos y derivación |
-| [`palabras_reservadas.md`](palabras_reservadas.md) | Los 72 términos reservados del lenguaje completo |
+| [`palabras_reservadas.md`](palabras_reservadas.md) | Los 73 términos reservados del lenguaje completo |
 | [`COMPARACION-EJEMPLO.md`](COMPARACION-EJEMPLO.md) | El programa de ejemplo derivado línea por línea |
 | [`DOCUMENTO.md`](DOCUMENTO.md) | Todo el lenguaje en un solo sitio |
 

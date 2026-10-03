@@ -48,7 +48,7 @@ se reconoce como una sola unidad antes de que `#` pueda empezar un comentario. P
 
 # 2 · Palabras reservadas de las reglas
 
-Las cinco palabras que construyen una regla.
+Las seis palabras que construyen una regla.
 
 | Palabra | Categoría | Significado |
 |---|---|---|
@@ -57,6 +57,7 @@ Las cinco palabras que construyen una regla.
 | `Y` | Operador lógico | Conjunción. Las dos condiciones que une tienen que cumplirse. También une dos acciones para que se ejecuten ambas. |
 | `O` | Operador lógico | Disyunción. Basta con que se cumpla una de las dos. |
 | `NO` | Operador lógico | Negación. Invierte el valor de la condición que le sigue. |
+| `mostrar` | Palabra clave | Imprime un valor mientras la pieza suena: `TOCAR mostrar tempo`. Es la instrucción de impresión del lenguaje; sirve para depurar el intérprete. En minúscula, como las palabras de la pieza. |
 
 ### Por qué estas y no otras
 
@@ -258,7 +259,7 @@ La lista completa de variables con su tipo de dato en Java está en el [README](
 
 | Categoría | Cuántas | Cuáles |
 |---|---|---|
-| Palabras clave de regla | 2 | `AL` `TOCAR` |
+| Palabras clave de regla | 3 | `AL` `TOCAR` `mostrar` |
 | Operadores lógicos | 3 | `Y` `O` `NO` |
 | Operadores relacionales | 6 | `>` `<` `=` `>=` `<=` `<>` |
 | Operadores aritméticos | 4 | `+` `-` `*` `/` |
@@ -271,7 +272,7 @@ La lista completa de variables con su tipo de dato en Java está en el [README](
 | Literales de figura | 6 | `redonda` `blanca` `negra` `corchea` `semicorchea` `fusa` |
 | Literales de nota | 7 | `do` `re` `mi` `fa` `sol` `la` `si` |
 
-**72 términos reservados en total.** Los primeros seis bloques —los que construyen una regla— suman **30** y son los únicos que hacen falta para leer [`reglas.txt`](reglas.txt). Los otros 42 describen la pieza.
+**73 términos reservados en total.** Los primeros seis bloques —los que construyen una regla— suman **31** y son los únicos que hacen falta para leer [`reglas.txt`](reglas.txt). Los otros 42 describen la pieza.
 
 ---
 

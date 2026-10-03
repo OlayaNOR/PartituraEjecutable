@@ -72,7 +72,7 @@ Toda regla tiene la misma forma: `AL`, una condición, `TOCAR`, una acción. Las
 | `AL` | palabra clave | `AL` |
 | `<condicion>` | variable · operador · valor | `es_estribillo Y intensidad > 0.7` |
 | `TOCAR` | palabra clave | `TOCAR` |
-| `<accion>` | identificador, o asignación | `activar_percusion` · `tempo = tempo - 10` |
+| `<accion>` | identificador, asignación o impresión | `activar_percusion` · `tempo = tempo - 10` · `mostrar tempo` |
 
 **Formas adicionales que admite la sintaxis:**
 
@@ -133,7 +133,7 @@ Las 15 se revisan en cada compás, en orden de declaración. Si dos fijan la mis
 
 ## 5 · El diccionario de palabras reservadas
 
-TocaScript reserva **72 términos** en su lenguaje completo; la lista está en `palabras_reservadas.md`. Aquí se agrupan por categoría los que usa esta gramática.
+TocaScript reserva **73 términos** en su lenguaje completo; la lista está en `palabras_reservadas.md`. Aquí se agrupan por categoría los que usa esta gramática.
 
 ### 5.1 · Palabras clave de las reglas
 
@@ -144,6 +144,7 @@ TocaScript reserva **72 términos** en su lenguaje completo; la lista está en `
 | `Y` | Operador lógico | Conjunción. También une dos acciones. |
 | `O` | Operador lógico | Disyunción. |
 | `NO` | Operador lógico | Negación. |
+| `mostrar` | Palabra clave | Imprime un valor mientras la pieza suena: `TOCAR mostrar tempo`. Para depurar el intérprete (taller del 2-oct). |
 
 ### 5.2 · Operadores
 
@@ -290,6 +291,7 @@ Todos los terminales van entre comillas dobles —palabras clave, símbolos, let
 #
 #  TERMINALES — van entre comillas; ahí termina la derivación y son lo que el lexer reconoce:
 #    Palabras clave de la regla  "AL" "TOCAR" "Y" "O" "NO"
+#    Impresión (acción)          "mostrar"
 #    Palabras clave de la pieza  "motivo" "seccion" "tipo" "pieza" "silencio"
 #    Tipos de sección            "intro" "estrofa" "estribillo" "coda"
 #    Nombres de nota             "do" "re" "mi" "fa" "sol" "la" "si"
@@ -307,6 +309,7 @@ Todos los terminales van entre comillas dobles —palabras clave, símbolos, let
  2  <cabecera> ::= <ajuste> <nl>
                    <ajuste> <nl>
                    <ajuste> <nl>
+                   { <ajuste> <nl> }
  3  <ajuste> ::= <variable> <valor>
  4  <pieza> ::= "pieza" <texto> "{" { <identificador> } "}" <nl>
  5  <motivo> ::= "motivo" <identificador> "{" { <evento> } "}" <nl>
@@ -339,6 +342,7 @@ Todos los terminales van entre comillas dobles —palabras clave, símbolos, let
 22  <primario> ::= <variable> | <valor> | "(" <operando> ")"
 23  <acciones> ::= <accion> { "Y" <accion> }
 24  <accion> ::= <variable> "=" <operando>
+               | "mostrar" <operando>
                | <identificador>
 
 # ── Nombres y valores ──
@@ -407,6 +411,7 @@ Todo lo que va entre comillas en la gramática. Son los términos reservados que
 | Categoría | Terminales |
 |---|---|
 | Palabras clave de la regla | `"AL"` `"TOCAR"` `"Y"` `"O"` `"NO"` |
+| Impresión (acción) | `"mostrar"` |
 | Palabras clave de la pieza | `"motivo"` `"seccion"` `"tipo"` `"pieza"` `"silencio"` |
 | Tipos de sección | `"intro"` `"estrofa"` `"estribillo"` `"coda"` |
 | Nombres de nota | `"do"` `"re"` `"mi"` `"fa"` `"sol"` `"la"` `"si"` |
@@ -418,7 +423,7 @@ Todo lo que va entre comillas en la gramática. Son los términos reservados que
 | Símbolos | `"("` `")"` `"{"` `"}"` `"["` `"]"` `":"` `"_"` `" "` `'"'` `"↵"` |
 | Átomos | `"a … z"` `"A … Z"` `"0 … 9"` |
 
-`tempo`, `compas` y `tonalidad` no son terminales sino variables: la cabecera las fija y las reglas las consultan. La lista completa de los 72 términos reservados del lenguaje extendido está en la sección 5.
+`tempo`, `compas` y `tonalidad` no son terminales sino variables: la cabecera las fija y las reglas las consultan. La lista completa de los 73 términos reservados del lenguaje extendido está en la sección 5.
 
 **Ejemplo mínimo** — el evento `do4:negra`:
 
@@ -535,7 +540,7 @@ Aho, A. V., Lam, M. S., Sethi, R. & Ullman, J. D. — *Compilers: Principles, Te
 | `README.md` | El lenguaje completo, las 15 reglas y la tabla de variables |
 | `reglas.txt` | Las 15 reglas en su forma oficial |
 | `REGLAS.md` | Qué hace cada regla y por qué |
-| `palabras_reservadas.md` | Los 72 términos con categoría y significado |
+| `palabras_reservadas.md` | Los 73 términos con categoría y significado |
 | `gramatica.md` | Las 33 producciones BNF, terminales y no terminales etiquetados, y la derivación de la regla 11 |
 | `gramatica/` | Una ficha por producción, con desglose, ejemplos y derivación |
 | `VERIFICACION-REGLAS.md` | Las 15 reglas derivadas una a una |

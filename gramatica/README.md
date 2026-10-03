@@ -40,6 +40,7 @@
 #
 #  TERMINALES — van entre comillas; ahí termina la derivación y son lo que el lexer reconoce:
 #    Palabras clave de la regla  "AL" "TOCAR" "Y" "O" "NO"
+#    Impresión (acción)          "mostrar"
 #    Palabras clave de la pieza  "motivo" "seccion" "tipo" "pieza" "silencio"
 #    Tipos de sección            "intro" "estrofa" "estribillo" "coda"
 #    Nombres de nota             "do" "re" "mi" "fa" "sol" "la" "si"
@@ -57,6 +58,7 @@
  2  <cabecera> ::= <ajuste> <nl>
                    <ajuste> <nl>
                    <ajuste> <nl>
+                   { <ajuste> <nl> }
  3  <ajuste> ::= <variable> <valor>
  4  <pieza> ::= "pieza" <texto> "{" { <identificador> } "}" <nl>
  5  <motivo> ::= "motivo" <identificador> "{" { <evento> } "}" <nl>
@@ -89,6 +91,7 @@
 22  <primario> ::= <variable> | <valor> | "(" <operando> ")"
 23  <acciones> ::= <accion> { "Y" <accion> }
 24  <accion> ::= <variable> "=" <operando>
+               | "mostrar" <operando>
                | <identificador>
 
 # ── Nombres y valores ──

@@ -33,6 +33,7 @@ La producción `<regla>` y, debajo, todas las que abre hasta llegar a los átomo
 19  <operador> ::= ">" | "<" | ">=" | "<=" | "=" | "<>"
 23  <acciones> ::= <accion> { "Y" <accion> }
 24  <accion> ::= <variable> "=" <operando>
+               | "mostrar" <operando>
                | <identificador>
 33  <nl> ::= "↵"
 ```

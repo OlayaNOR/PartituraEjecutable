@@ -12,6 +12,7 @@ La producción `<programa>` y, debajo, todas las que abre hasta llegar a los át
  2  <cabecera> ::= <ajuste> <nl>
                    <ajuste> <nl>
                    <ajuste> <nl>
+                   { <ajuste> <nl> }
  3  <ajuste> ::= <variable> <valor>
 25  <variable> ::= <identificador>
 26  <identificador> ::= <letra> { <letra> | <digito> | "_" }
@@ -51,6 +52,7 @@ La producción `<programa>` y, debajo, todas las que abre hasta llegar a los át
 19  <operador> ::= ">" | "<" | ">=" | "<=" | "=" | "<>"
 23  <acciones> ::= <accion> { "Y" <accion> }
 24  <accion> ::= <variable> "=" <operando>
+               | "mostrar" <operando>
                | <identificador>
  4  <pieza> ::= "pieza" <texto> "{" { <identificador> } "}" <nl>
 ```

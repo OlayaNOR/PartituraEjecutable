@@ -10,6 +10,7 @@ La producción `<acciones>` y, debajo, todas las que abre hasta llegar a los át
 23  <acciones> ::= <accion> { "Y" <accion> }
 
 24  <accion> ::= <variable> "=" <operando>
+               | "mostrar" <operando>
                | <identificador>
 25  <variable> ::= <identificador>
 26  <identificador> ::= <letra> { <letra> | <digito> | "_" }

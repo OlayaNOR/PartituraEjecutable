@@ -17,6 +17,7 @@
 # <valor>      ::= numero (entero o decimal) | true | false | "texto"
 # <accion>     ::= identificador en minusculas con guion_bajo
 #                | <variable> = <operando>
+#                | mostrar <operando>
 #
 # ------------------------------------------------------------
 # Formas adicionales que admite la sintaxis:
@@ -28,6 +29,7 @@
 #   Accion por asignacion:      <variable> = <valor>
 #   Acciones multiples:         <accion> Y <accion>
 #   Aritmetica en el valor:     tempo = tempo - 10
+#   Impresion (depuracion):     mostrar tempo
 #
 # ------------------------------------------------------------
 # Convencion de escritura:

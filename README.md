@@ -31,6 +31,7 @@ Los archivos del lenguaje usan la extensión **`.toca`**.
 # <valor>      ::= numero (entero o decimal) | true | false | "texto"
 # <accion>     ::= identificador en minusculas con guion_bajo
 #                | <variable> = <operando>
+#                | mostrar <operando>
 ```
 
 ### Gramática completa
@@ -67,6 +68,8 @@ La gramática de `<expresion>` está escrita en tres niveles —`expresion`, `te
 | Condición booleana simple | `es_coda` | equivale a `es_coda = true`; la forma corta evita decir lo mismo dos veces |
 | Acción por asignación | `dinamica = "ff"` | la mayoría de acciones musicales fijan una propiedad, no invocan un procedimiento |
 | Acciones múltiples y aritmética | `<accion> Y <accion>`<br>`tempo = tempo - 10` | la regla 12 hace dos cosas; las reglas 11, 14 y 15 calculan el valor nuevo a partir del actual |
+| Impresión | `mostrar tempo` | ver un valor mientras la pieza suena, para depurar el intérprete; acepta variable, número, texto o cuenta |
+| Declaración de variables propias | `umbral 0.7` en la cabecera | después de `tempo`, `compas` y `tonalidad` se pueden fijar variables nuevas; sin tipo y sin `=`, para distinguirla de la asignación |
 
 ---
 
@@ -85,7 +88,7 @@ La gramática de `<expresion>` está escrita en tres niveles —`expresion`, `te
 
 **El lenguaje distingue mayúsculas de minúsculas**, y esa distinción hace trabajo: las palabras de las reglas van en mayúsculas y las de la pieza en minúsculas, así se separan de un vistazo y nunca chocan entre sí.
 
-Los **72 términos reservados** del lenguaje —palabras clave, operadores, delimitadores, figuras y notas— están documentados uno por uno, con su categoría y significado, en [`palabras_reservadas.md`](palabras_reservadas.md). Ahí están también las convenciones léxicas: qué forma tiene un identificador, un número, un literal de texto o una nota.
+Los **73 términos reservados** del lenguaje —palabras clave, operadores, delimitadores, figuras y notas— están documentados uno por uno, con su categoría y significado, en [`palabras_reservadas.md`](palabras_reservadas.md). Ahí están también las convenciones léxicas: qué forma tiene un identificador, un número, un literal de texto o una nota.
 
 ---
 
@@ -247,7 +250,7 @@ PartituraEjecutable/
 ├── README.md                  ← este archivo: el lenguaje, las 15 reglas y las variables
 ├── reglas.txt                 ← las 15 reglas en su forma oficial, con la sintaxis general como comentario
 ├── REGLAS.md                  ← qué hace cada regla y por qué
-├── palabras_reservadas.md     ← los 72 términos reservados, con categoría y significado
+├── palabras_reservadas.md     ← los 73 términos reservados, con categoría y significado
 ├── gramatica.md               ← las 33 producciones BNF, con terminales y no terminales etiquetados
 ├── gramatica/                 ← una ficha por producción: desglose, derivación, ejemplo inválido
 ├── VERIFICACION-REGLAS.md     ← las 15 reglas derivadas una a una contra la gramática

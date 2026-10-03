@@ -10,6 +10,7 @@ La producción `<cabecera>` y, debajo, todas las que abre hasta llegar a los át
  2  <cabecera> ::= <ajuste> <nl>
                    <ajuste> <nl>
                    <ajuste> <nl>
+                   { <ajuste> <nl> }
 
  3  <ajuste> ::= <variable> <valor>
 25  <variable> ::= <identificador>
@@ -28,7 +29,7 @@ La producción `<cabecera>` y, debajo, todas las que abre hasta llegar a los át
 
 ## Cómo se lee
 
-Tres ajustes, uno por línea, cada uno seguido de su salto de línea. Los tres son obligatorios y, por convención de la pieza, son `tempo`, `compas` y `tonalidad`, en ese orden.
+Tres ajustes obligatorios, uno por línea —`tempo`, `compas` y `tonalidad`, en ese orden— y después cero o más ajustes propios. Así se **declaran** variables nuevas (`umbral 0.7`) antes de que las reglas las usen: es la instrucción de declaración de TocaScript.
 
 ## Qué usa y quién la usa
 
@@ -46,6 +47,7 @@ Cada ejemplo, y debajo el árbol que la gramática construye para él: cada nodo
 tempo 100
 compas "4/4"
 tonalidad "Do mayor"
+umbral 0.7
 ```
 
 ```
@@ -68,6 +70,12 @@ tonalidad "Do mayor"
     <valor> (27)
       <texto> (29)  → '"' "D" "o" " " "m" "a" "y" "o" "r" '"'
   <nl> (33)  → "↵"
+  <ajuste> (3)
+    <variable> (25)
+      <identificador> (26)  → "u" "m" "b" "r" "a" "l"
+    <valor> (27)
+      <numero> (28)  → "0" "." "7"
+  <nl> (33)  → "↵"
 ```
 
 ## Ejemplo inválido
@@ -84,7 +92,7 @@ tonalidad "Do mayor"
 
 ## Nota de diseño
 
-Son las tres cosas que toda partitura escribe antes de la primera nota: tempo, cifra de compás y tonalidad. **`tempo`, `compas` y `tonalidad` no son palabras reservadas: son variables**, las mismas que después consultan y modifican las reglas (`AL tempo > 140 …`, `TOCAR tempo = tempo - 10`). La verificación regla por regla lo destapó: con `"tempo"` como palabra clave, cinco de las quince reglas no derivaban, porque una palabra no puede ser terminal y variable a la vez. Se ajustó la gramática, no las reglas: la cabecera es una lista de ajustes de variable.
+Son las tres cosas que toda partitura escribe antes de la primera nota: tempo, cifra de compás y tonalidad. **`tempo`, `compas` y `tonalidad` no son palabras reservadas: son variables**, las mismas que después consultan y modifican las reglas (`AL tempo > 140 …`, `TOCAR tempo = tempo - 10`). La verificación regla por regla lo destapó: con `"tempo"` como palabra clave, cinco de las quince reglas no derivaban, porque una palabra no puede ser terminal y variable a la vez. Se ajustó la gramática, no las reglas: la cabecera es una lista de ajustes de variable. Los ajustes propios (`{ <ajuste> <nl> }`) se añadieron en el taller de las cuatro instrucciones (2-oct): la declaración no lleva tipo —los valores llevan el suyo— ni signo igual, para que se distinga de la asignación.
 
 ---
 *Convención: `<x>` no terminal · `"x"` terminal · `'"'` la comilla doble como terminal · `{ }` cero o más · `[ ]` cero o uno · `|` alternativa · `<nl>` salto de línea*

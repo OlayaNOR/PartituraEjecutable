@@ -15,7 +15,7 @@ NUM = {n: i + 1 for i, n in enumerate([
     "letra", "mayuscula", "digito", "nl"])}
 
 KW_REGLA = {"AL", "TOCAR", "Y", "O", "NO"}
-KW_PIEZA = {"motivo", "seccion", "tipo", "pieza", "silencio"}
+KW_PIEZA = {"motivo", "seccion", "tipo", "pieza", "silencio", "mostrar"}
 TIPOS = {"intro", "estrofa", "estribillo", "coda"}
 FIGURAS = {"redonda", "blanca", "negra", "corchea", "semicorchea", "fusa"}
 OPS = [">=", "<=", "<>", ">", "<", "=", "+", "-", "*", "/"]
@@ -177,6 +177,8 @@ class Parser:
             self.eat(); h += [T("O"), self.termino()]
         return N("<expresion>", h)
     def accion(self):
+        if self.peek().kind == "kw" and self.peek().text == "mostrar":
+            self.eat(); return N("<accion>", [T("mostrar"), self.operando()])
         tk = self.eat("ident")
         if self.peek().kind == "op" and self.peek().text == "=":
             self.eat(); return N("<accion>", [self.variable(tk.text), T("="), self.operando()])
@@ -244,6 +246,7 @@ class Parser:
     def cabecera(self):
         h = []
         for _ in range(3): h += [self.ajuste(), self.nl()]
+        while self.peek().kind == "ident": h += [self.ajuste(), self.nl()]   # ajustes propios: { <ajuste> <nl> }
         return N("<cabecera>", h)
     def programa(self):
         h = [self.cabecera()]

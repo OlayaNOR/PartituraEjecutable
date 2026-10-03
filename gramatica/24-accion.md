@@ -8,6 +8,7 @@ La producción `<accion>` y, debajo, todas las que abre hasta llegar a los átom
 
 ```
 24  <accion> ::= <variable> "=" <operando>
+               | "mostrar" <operando>
                | <identificador>
 
 25  <variable> ::= <identificador>
@@ -28,13 +29,13 @@ La producción `<accion>` y, debajo, todas las que abre hasta llegar a los átom
 
 ## Cómo se lee
 
-Una asignación —variable, igual, operando— o el nombre de una acción predefinida.
+Una asignación —variable, igual, operando—, una impresión —`mostrar` y lo que se quiere ver— o el nombre de una acción predefinida.
 
 ## Qué usa y quién la usa
 
 | | |
 |---|---|
-| **Terminales que aparecen** (entre comillas) | `"="` |
+| **Terminales que aparecen** (entre comillas) | `"="` · `"mostrar"` |
 | **No terminales que aparecen** (se abren en otra producción) | `<variable>` · `<operando>` · `<identificador>` |
 | **Producciones que usan `<accion>`** | `<acciones>` |
 
@@ -64,6 +65,34 @@ tempo = tempo - 10
 ```
 
 ```
+mostrar tempo
+```
+
+```
+<accion> (24)
+  "mostrar"
+  <operando> (20)
+    <sumando> (21)
+      <primario> (22)
+        <variable> (25)
+          <identificador> (26)  → "t" "e" "m" "p" "o"
+```
+
+```
+mostrar "llegamos a la coda"
+```
+
+```
+<accion> (24)
+  "mostrar"
+  <operando> (20)
+    <sumando> (21)
+      <primario> (22)
+        <valor> (27)
+          <texto> (29)  → '"' "l" "l" "e" "g" "a" "m" "o" "s" " " "a" " " "l" "a" " " "c" "o" "d" "a" '"'
+```
+
+```
 activar_percusion
 ```
 
@@ -82,7 +111,7 @@ activar_percusion
 
 ## Nota de diseño
 
-El `=` aquí es asignación; en `<condicion>` es comparación. Se distinguen por estar antes o después de `TOCAR`.
+El `=` aquí es asignación; en `<condicion>` es comparación. Se distinguen por estar antes o después de `TOCAR`. `mostrar` es la instrucción de impresión del taller del 2-oct: TocaScript suena, no imprime, pero para depurar el intérprete hace falta ver valores; acepta cualquier `<operando>` —variable, número, texto o una cuenta—. Va en minúscula, como las palabras clave de la pieza.
 
 ---
 *Convención: `<x>` no terminal · `"x"` terminal · `'"'` la comilla doble como terminal · `{ }` cero o más · `[ ]` cero o uno · `|` alternativa · `<nl>` salto de línea*

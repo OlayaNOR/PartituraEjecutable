@@ -13,15 +13,23 @@ Trabajo de la guía *De Java a Python: construyendo un lexer*. Cada archivo corr
 | `paso7.py` | `digitos` lanza `SyntaxError` si hay algo que no es dígito ni letra; `try` / `except` con `a1b` y `a1@` | el mensaje nombra el carácter |
 | `paso7_tocascript.py` | **Entregable final:** el paso 7 personalizado, el lexer corto de la **declaración de TocaScript** (IDENTIFICADOR, NUMERO, TEXTO, BOOLEANO, NL) | tokeniza `tempo 100`, `compas "4/4"`, `umbral 0.7` y avisa del carácter inesperado, el número mal formado o el texto sin cerrar |
 
-## `lexer.py` — el lexer que crece hasta el parcial 2
+## El lexer del parcial 2 (23 y 24 de octubre)
 
-Parte de `paso7_tocascript.py` y va sumando las tareas de *Trabajo en el proyecto* (parcial 2: 23 y 24 de octubre).
+Las tareas de *Trabajo en el proyecto*. Cada archivo trae todo lo de la tarea anterior más lo nuevo;
+**`paso6_3.py` es el lexer completo** y `pruebas.py` corre los 6 casos del parcial (`python pruebas.py`).
 
-| Tarea | Qué cambió | Listo cuando |
-|---|---|---|
-| 1 · Columna | cada tupla lleva la columna donde empieza: `columna = i - inicio_linea + 1` | `tempo 100` → `tempo` en 1, `100` en 7 |
-| 2 · Línea | `(tipo, texto, línea, columna)`; en cada `\n` se suma la línea y `inicio_linea = i` (la columna vuelve a 1) | `tempo 100\ncompas "4/4"` → `compas` en línea 2, columna 1 |
-| 3 · Identificadores | ya estaba: letra, luego letras, dígitos o `_` | `tempo`, `umbral`, `integer` salen completos |
+| Tarea | Archivo | Qué cambió | Listo cuando |
+|---|---|---|---|
+| 1 · Columna | `lexer.py` | cada tupla lleva la columna donde empieza: `columna = i - inicio_linea + 1` | `tempo 100` → `tempo` en 1, `100` en 7 |
+| 2 · Línea | `lexer.py` | `(tipo, texto, línea, columna)`; en cada `\n` se suma la línea y `inicio_linea = i` | `tempo 100\ncompas "4/4"` → `compas` en línea 2, columna 1 |
+| 3 · Identificadores | `lexer.py` | letra, luego letras, dígitos o `_` | `tempo`, `umbral`, `integer` salen completos |
+| 4 · Reservadas y tipos | `paso4.py` | conjuntos `TIPOS`, `LOGICOS` y `RESERVADAS`, comparados con la palabra completa | `motivo tema` → TIPO + IDENTIFICADOR; `motivos` no se parte |
+| 5 · Asignación y fin | `paso5.py` | `SIMBOLOS_LARGOS` (`>=` `<=` `<>`) primero con `startswith`, luego `SIMBOLOS_1` (`=` `<` `>`); el fin de instrucción es el `NL` | `motivo tema = 5` da sus tokens; `:=` y `;` dan error |
+| 6 · Comentarios | `paso6.py` | `#` (al inicio o tras un espacio) hasta el `\n`, sin consumirlo | un comentario al final no cambia los tokens ni la línea siguiente |
+| 6.1 · Errores con posición | `paso6_1.py` | todos los errores dicen `Línea L, columna C:` | `int x = 5 @` → línea 1, columna 11 |
+| 6.2 · Decimales y cadenas | `paso6_2.py` | un decimal lleva un solo punto; un texto no pasa de línea | `precio = 3.14` → `3.14` entero; `3.4.5` y la cadena sin cerrar dan error en la línea donde empiezan |
+| 6.3 · Operadores | `paso6_3.py` | `OPERADORES = {"+", "-", "*", "/"}` → token `OPERADOR` | `volumen = tempo + 5 * 2` y `volumen=tempo+5*2` dan los mismos 7 tokens |
+| 7 · Pruebas | `pruebas.py` | 3 casos válidos y 3 inválidos con la salida esperada calculada a mano | 6 de 6 coinciden |
 
 ```
 'tempo 100\ncompas "4/4"'

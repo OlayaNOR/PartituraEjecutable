@@ -40,6 +40,32 @@ Las tareas de *Trabajo en el proyecto*. Cada archivo trae todo lo de la tarea an
    ('TEXTO', '4/4', 2, 8)
 ```
 
+## Sesión 1 del 30 de octubre: lexer completo
+
+Las tareas 8 a 12 siguen el mismo esquema: cada archivo trae todo lo del anterior más lo nuevo.
+**`paso12.py` es ahora el lexer completo** y `pruebas_30oct.py` corre los 23 casos de la sesión
+(los "listo cuando" de cada tarea más los 6 de la tarea 7, ahora con el `EOF`): `python pruebas_30oct.py`.
+
+La guía plantea las tareas con Java; aquí se aplican a TocaScript, igual que en las tareas anteriores:
+
+| Tarea | Archivo | Qué cambió | Listo cuando |
+|---|---|---|---|
+| 8 · Delimitadores | `paso8.py` | `( ) { } [ ] : , .` entran a `SIMBOLOS_1` → token `SIMBOLO`; el `.` de `3.14` lo consume antes el bloque del número | `(tempo+5)*2` da 7 tokens con sus columnas; `silencio:negra.` → `:` y `.` como SIMBOLO; `tema.parte` → IDENTIFICADOR, SIMBOLO, IDENTIFICADOR |
+| 9 · Operadores de dos caracteres | `paso9.py` | `OPERADORES_LARGOS` (`>=` `<=` `<>`) se revisan primero con `startswith`; `<` y `>` pasan a `OPERADORES`. TocaScript no tiene `==` ni `!=` (su igual es `=` y su distinto `<>`); el `=` sigue como SIMBOLO porque también es la asignación | `x >= 5` da 3 tokens, `x > = 5` da 4 y `x ! 5` da error en la columna 3 |
+| 10 · Control y booleanos | `paso10.py` | conjuntos `CONTROL` (`AL` `TOCAR` `repetir` `finales` `vez`, el control de TocaScript en vez de `if`/`else`/`while`) → RESERVADA, y `BOOLEANOS` (`true` `false`) → BOOLEANO; se compara con la palabra completa | `repetir` es RESERVADA; `repetirlo` y `repetir_x` son IDENTIFICADOR |
+| 11 · Comentarios de bloque | `paso11.py` | `/* … */` se descarta aunque ocupe varias líneas; cada `\n` de adentro suma la línea y reinicia la columna sin generar `NL`. Se revisa antes que los operadores | un comentario de 3 líneas deja lo siguiente en la línea 4; sin cerrar → error en la línea y columna donde empezó |
+| 12 · Fin de archivo | `paso12.py` | al terminar se agrega `("EOF", "", línea, columna)` con la posición final | `volumen = 5` da 3 tokens más EOF en 1:12; el texto vacío da solo `("EOF", "", 1, 1)` |
+
+```
+'tempo 120 /* uno\ndos\ntres */\nvolumen 80'
+   ('IDENTIFICADOR', 'tempo', 1, 1)
+   ('NUMERO', '120', 1, 7)
+   ('NL', '\\n', 3, 8)
+   ('IDENTIFICADOR', 'volumen', 4, 1)
+   ('NUMERO', '80', 4, 9)
+   ('EOF', '', 4, 11)
+```
+
 ## `paso2.py` y `paso3.py`
 
 Los pasos 2 y 3 de la guía no tienen mini-ejercicio; son apuntes de apoyo (`len`, `t[i]`, `t[a:b]`, `if` / `elif` con `isdigit` e `isalpha`).
@@ -57,7 +83,7 @@ Los pasos 2 y 3 de la guía no tienen mini-ejercicio; son apuntes de apoyo (`len
 | Signo igual | `=` | no hay en la cabecera | `=` es error léxico aquí |
 | Fin de instrucción | `;` | salto de línea | `\n` **es un token** (`NL`), no se ignora |
 | Nombre de variable | letra, luego letras/dígitos | `<letra>` solo minúsculas, luego letras, dígitos o `_` | una mayúscula en el nombre es *identificador inválido*; `AL`, `TOCAR` y `mostrar` salen como RESERVADA |
-| Comentario | `//` | `#` hasta el fin de línea | no entra en la versión corta; lo descarta el lexer completo |
+| Comentario | `//` y `/* … */` | `#` hasta el fin de línea y `/* … */` de bloque | no entra en la versión corta; lo descarta el lexer completo |
 
 ```
 'tempo 100'     -> [('IDENTIFICADOR', 'tempo'), ('NUMERO', '100')]

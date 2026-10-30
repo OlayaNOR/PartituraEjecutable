@@ -29,6 +29,7 @@ Antes de la lista, las reglas que gobiernan cómo se escribe cualquier cosa en e
 | **Nota** | Nombre + alteración opcional + octava **obligatoria** | `do4`, `fa#4`, `mib3` | `do`, `fa#` |
 | **Figura** | Dos puntos + nombre + puntillo opcional | `:negra`, `:negra.` | `:corchea3` |
 | **Comentario** | `#` hasta el final de la línea | `# R1 - acento fuerte` | |
+| **Comentario de bloque** | `/*` hasta `*/`, puede ocupar varias líneas | `/* intro lenta */` | `/* sin cerrar` |
 
 **El lenguaje distingue mayúsculas de minúsculas.** `AL` es una palabra reservada; `al` sería un identificador cualquiera.
 

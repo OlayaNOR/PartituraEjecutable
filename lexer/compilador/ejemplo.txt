@@ -1,0 +1,36 @@
+# programa de ejemplo
+tempo 120
+umbral 0.75
+compas "4/4"
+tonalidad "Do mayor"
+
+/* Dos motivos cortos y una seccion que los junta.
+   El saludo sube por la escala y la respuesta
+   cierra con el acorde de Do mayor. */
+
+motivo saludo {
+  do4:negra    re4:negra    mi4:blanca
+}
+
+motivo respuesta {
+  [do3 mi3 sol3]:redonda
+  silencio:negra.
+}
+
+motivo melodia {
+  repetir 2 { tocar saludo }
+  tocar respuesta
+}
+
+seccion inicio tipo intro {
+  melodia
+}
+
+# reglas de interpretacion: condicion, operadores y decimales
+AL tempo >= 100 Y umbral < 0.8 TOCAR volumen = tempo * 0.5 + 10
+AL NO (compas <> "3/4") TOCAR mostrar "compas normal"
+AL es_intro = true TOCAR mostrar tempo - 20
+
+pieza "Mi primera pieza" {
+  inicio
+}

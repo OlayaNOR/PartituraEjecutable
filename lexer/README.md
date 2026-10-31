@@ -66,6 +66,44 @@ La guía plantea las tareas con Java; aquí se aplican a TocaScript, igual que e
    ('EOF', '', 4, 11)
 ```
 
+## Sesión 2 del 31 de octubre: lexer profesional
+
+Las tareas 13 y 14 siguen el esquema de un archivo por tarea. En la 15 el lexer se reparte en módulos dentro de
+**`compilador/`**, la carpeta donde irán las siguientes fases (parser, nodos, semántico, generador).
+`pruebas_31oct.py` corre los 38 casos de la sesión: `python pruebas_31oct.py`.
+
+| Tarea | Archivo | Qué cambió | Listo cuando |
+|---|---|---|---|
+| 13 · Clase Token | `paso13.py` | `@dataclass class Token` con `tipo`, `texto`, `linea` y `columna`; cada `tokens.append((...))` pasa a `tokens.append(Token(...))`. `__str__` imprime `NUMERO('5') en 1:9` | los 23 casos de `pruebas_30oct.py` dan lo mismo (se comparan con `astuple`) |
+| 14 · Excepción propia | `paso14.py` | `class ErrorLexico(Exception)` guarda `mensaje`, `linea` y `columna`; los 6 `raise SyntaxError` pasan a `raise ErrorLexico(...)` con el formato `Error léxico en línea L, columna C: …`, y el carácter desconocido dice `carácter '@' no reconocido` | `try / except ErrorLexico as e` lee `e.linea` y `e.columna`; `tempo 120\nvolumen 2 @` → 2 y 11 |
+| 15 · Leer un archivo | `compilador/` | `tokens.py` (Token y ErrorLexico), `lexer.py` (`tokenizar`) y `main.py`, que lee `sys.argv[1]` con `encoding="utf-8"` y muestra la tabla `LINEA COL TIPO TEXTO`. Con error léxico imprime solo el mensaje y sale con código 1. El tabulador se descarta como el espacio, porque ahora se leen archivos | `python main.py programa.txt` muestra la tabla y `python main.py programa_invalido.txt` da el error en 1:11 sin traza |
+| 16 · Programa de ejemplo | `compilador/ejemplo.txt` | 36 líneas de TocaScript: cabecera con decimal y cadenas, comentario de línea y de bloque, motivos con acorde y puntillo, `repetir`, una sección, tres reglas `AL … TOCAR` con `>=`, `<`, `<>`, `Y`, `NO`, `*`, `+`, `-`, `mostrar`, y la pieza | se tokeniza sin errores y las 3 primeras líneas coinciden con el cálculo a mano |
+
+```
+cd compilador
+python main.py programa.txt
+LINEA  COL  TIPO           TEXTO
+1      1    IDENTIFICADOR  tempo
+1      7    NUMERO         120
+1      10   NL             \n
+2      1    IDENTIFICADOR  volumen
+2      9    SIMBOLO        =
+2      11   NUMERO         5
+2      12   NL             \n
+3      1    EOF
+
+python main.py programa_invalido.txt
+Error léxico en línea 1, columna 11: carácter '@' no reconocido
+```
+
+Las 3 primeras líneas de `ejemplo.txt`, calculadas a mano (la 1 es comentario y solo deja su `NL`):
+
+```
+# programa de ejemplo      ('NL', '\\n', 1, 22)
+tempo 120                  ('IDENTIFICADOR', 'tempo', 2, 1)  ('NUMERO', '120', 2, 7)  ('NL', '\\n', 2, 10)
+umbral 0.75                ('IDENTIFICADOR', 'umbral', 3, 1)  ('NUMERO', '0.75', 3, 8)  ('NL', '\\n', 3, 12)
+```
+
 ## `paso2.py` y `paso3.py`
 
 Los pasos 2 y 3 de la guía no tienen mini-ejercicio; son apuntes de apoyo (`len`, `t[i]`, `t[a:b]`, `if` / `elif` con `isdigit` e `isalpha`).

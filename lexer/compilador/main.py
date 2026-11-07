@@ -1,8 +1,10 @@
-# main.py · Tarea 15: lee un archivo y muestra la tabla de tokens
-# Uso: python main.py ejemplo.txt
+# main.py · lee un archivo, lo pasa por el lexer y recorre los tokens con el Parser
+# Uso: python main.py programa.txt
+#      python main.py --tabla programa.txt   (la tabla de tokens de la tarea 15)
 
 import sys
 from lexer import tokenizar
+from parser import Parser
 from tokens import ErrorLexico
 
 
@@ -13,11 +15,22 @@ def mostrar_tabla(tokens):
         print(f"{t.linea:<7}{t.columna:<5}{t.tipo:<15}{t.texto}".rstrip())
 
 
+def recorrer(tokens):
+    parser = Parser(tokens)
+    while parser.actual().tipo != "EOF":
+        print(parser.avanzar())           # Token.__str__: NUMERO('5') en 1:9
+    print(parser.actual())                # el EOF también se imprime
+
+
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Uso: python main.py <archivo>")
+    args = sys.argv[1:]
+    tabla = "--tabla" in args
+    if tabla:
+        args.remove("--tabla")
+    if len(args) != 1:
+        print("Uso: python main.py [--tabla] <archivo>")
         sys.exit(2)
-    ruta = sys.argv[1]
+    ruta = args[0]
     try:
         texto = open(ruta, encoding="utf-8").read()
     except FileNotFoundError:
@@ -26,6 +39,10 @@ if __name__ == "__main__":
     try:
         tokens = tokenizar(texto)
     except ErrorLexico as e:
-        print(e)                          # solo el mensaje: Error léxico en línea L, columna C: ...
+        print(e)                                          # el mensaje completo
+        print(f"linea = {e.linea}, columna = {e.columna}")  # la posición, leída por separado
         sys.exit(1)
-    mostrar_tabla(tokens)
+    if tabla:
+        mostrar_tabla(tokens)
+    else:
+        recorrer(tokens)

@@ -79,9 +79,11 @@ Las tareas 13 y 14 siguen el esquema de un archivo por tarea. En la 15 el lexer 
 | 15 · Leer un archivo | `compilador/` | `tokens.py` (Token y ErrorLexico), `lexer.py` (`tokenizar`) y `main.py`, que lee `sys.argv[1]` con `encoding="utf-8"` y muestra la tabla `LINEA COL TIPO TEXTO`. Con error léxico imprime solo el mensaje y sale con código 1. El tabulador se descarta como el espacio, porque ahora se leen archivos | `python main.py programa.txt` muestra la tabla y `python main.py programa_invalido.txt` da el error en 1:11 sin traza |
 | 16 · Programa de ejemplo | `compilador/ejemplo.txt` | 36 líneas de TocaScript: cabecera con decimal y cadenas, comentario de línea y de bloque, motivos con acorde y puntillo, `repetir`, una sección, tres reglas `AL … TOCAR` con `>=`, `<`, `<>`, `Y`, `NO`, `*`, `+`, `-`, `mostrar`, y la pieza | se tokeniza sin errores y las 3 primeras líneas coinciden con el cálculo a mano |
 
+Desde la sesión del 7 de noviembre la tabla sale con `python main.py --tabla programa.txt`.
+
 ```
 cd compilador
-python main.py programa.txt
+python main.py --tabla programa.txt
 LINEA  COL  TIPO           TEXTO
 1      1    IDENTIFICADOR  tempo
 1      7    NUMERO         120
@@ -103,6 +105,42 @@ Las 3 primeras líneas de `ejemplo.txt`, calculadas a mano (la 1 es comentario y
 tempo 120                  ('IDENTIFICADOR', 'tempo', 2, 1)  ('NUMERO', '120', 2, 7)  ('NL', '\\n', 2, 10)
 umbral 0.75                ('IDENTIFICADOR', 'umbral', 3, 1)  ('NUMERO', '0.75', 3, 8)  ('NL', '\\n', 3, 12)
 ```
+
+## 7 de noviembre: prototipo con clases
+
+`compilador/` queda con los cuatro archivos: `tokens.py` (Token y ErrorLexico), `lexer.py`, `parser.py` y `main.py`.
+`pruebas_7nov.py` corre los 33 casos: `python pruebas_7nov.py`.
+
+| Pieza | Archivo | Qué hace |
+|---|---|---|
+| Token | `tokens.py` | `@dataclass` con `tipo`, `texto`, `linea` y `columna`; `__str__` imprime `NUMERO('5') en 1:9` |
+| ErrorLexico | `tokens.py` | hereda de `Exception`, guarda `linea` y `columna`; `str(e)` es el mensaje completo |
+| Parser | `parser.py` | guarda `tokens` y `pos`; `actual()` devuelve el token sin moverse y `avanzar()` lo devuelve y pasa al siguiente (en EOF se queda quieto) |
+| main.py | `main.py` | lee el archivo, llama al lexer y recorre los tokens con el Parser hasta EOF; si hay error imprime el mensaje y después `linea = L, columna = C` leídos por separado |
+
+```
+cd compilador
+python main.py programa.txt
+IDENTIFICADOR('tempo') en 1:1
+NUMERO('120') en 1:7
+NL('\n') en 1:10
+IDENTIFICADOR('volumen') en 2:1
+SIMBOLO('=') en 2:9
+NUMERO('5') en 2:11
+NL('\n') en 2:12
+EOF('') en 3:1
+
+python main.py programa_invalido.txt
+Error léxico en línea 1, columna 11: carácter '@' no reconocido
+linea = 1, columna = 11
+```
+
+`pruebas_7nov.py` revisa:
+- los 23 casos de `pruebas_30oct.py` leyendo `t.tipo`, `t.texto`, `t.linea` y `t.columna`;
+- que `actual()` no mueva la posición;
+- que dos objetos Parser lleven cada uno su posición;
+- las dos salidas de `main.py`;
+- que estén los cuatro archivos.
 
 ## `paso2.py` y `paso3.py`
 

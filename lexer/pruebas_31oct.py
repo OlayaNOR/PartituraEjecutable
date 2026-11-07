@@ -96,12 +96,12 @@ revisar("T14 · las entradas válidas no cambian",
 
 # ----- Tarea 15 · leer un archivo -----
 def correr_main(archivo):
-    r = subprocess.run([sys.executable, "main.py", archivo], cwd=COMPILADOR, capture_output=True,
+    r = subprocess.run([sys.executable, "main.py", "--tabla", archivo], cwd=COMPILADOR, capture_output=True,
                        encoding="utf-8", env={**os.environ, "PYTHONIOENCODING": "utf-8"})
     return r.returncode, r.stdout, "Traceback" in r.stderr
 
 revisar("T15 · archivo válido (programa.txt)",
-        'python main.py programa.txt',
+        'python main.py --tabla programa.txt',
         (0, "LINEA  COL  TIPO           TEXTO\n"
             "1      1    IDENTIFICADOR  tempo\n"
             "1      7    NUMERO         120\n"
@@ -114,8 +114,9 @@ revisar("T15 · archivo válido (programa.txt)",
         correr_main("programa.txt"))
 
 revisar("T15 · archivo inválido (programa_invalido.txt), sin traza de Python",
-        'python main.py programa_invalido.txt',
-        (1, "Error léxico en línea 1, columna 11: carácter '@' no reconocido\n", False),
+        'python main.py --tabla programa_invalido.txt',
+        (1, "Error léxico en línea 1, columna 11: carácter '@' no reconocido\n"
+            "linea = 1, columna = 11\n", False),
         correr_main("programa_invalido.txt"))
 
 

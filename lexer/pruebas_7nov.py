@@ -111,12 +111,12 @@ revisar("Parser · dos objetos Parser llevan cada uno su posición",
 
 # ----- 5 · main.py recorre los tokens con el Parser -----
 def correr_main(archivo):
-    r = subprocess.run([sys.executable, "main.py", archivo], cwd=COMPILADOR, capture_output=True,
+    r = subprocess.run([sys.executable, "main.py", "--tokens", archivo], cwd=COMPILADOR, capture_output=True,
                        encoding="utf-8", env={**os.environ, "PYTHONIOENCODING": "utf-8"})
     return r.returncode, r.stdout, "Traceback" in r.stderr
 
 revisar("main.py · archivo válido, recorre hasta EOF",
-        "python main.py programa.txt",
+        "python main.py --tokens programa.txt",
         (0, "IDENTIFICADOR('tempo') en 1:1\n"
             "NUMERO('120') en 1:7\n"
             "NL('\\n') en 1:10\n"
@@ -128,7 +128,7 @@ revisar("main.py · archivo válido, recorre hasta EOF",
         correr_main("programa.txt"))
 
 revisar("main.py · archivo inválido, mensaje y posición sin traza de Python",
-        "python main.py programa_invalido.txt",
+        "python main.py --tokens programa_invalido.txt",
         (1, "Error léxico en línea 1, columna 11: carácter '@' no reconocido\n"
             "linea = 1, columna = 11\n", False),
         correr_main("programa_invalido.txt"))
@@ -136,7 +136,7 @@ revisar("main.py · archivo inválido, mensaje y posición sin traza de Python",
 archivos = sorted(f for f in os.listdir(COMPILADOR) if f.endswith(".py"))
 revisar("Organización · los cuatro archivos",
         "compilador/",
-        ["lexer.py", "main.py", "parser.py", "tokens.py"],
+        ["arbol.py", "lexer.py", "main.py", "parser.py", "tokens.py"],
         archivos)
 
 print(f"{aciertos} de {total} casos coinciden")

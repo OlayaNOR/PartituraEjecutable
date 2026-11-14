@@ -142,6 +142,71 @@ linea = 1, columna = 11
 - las dos salidas de `main.py`;
 - que estén los cuatro archivos.
 
+## 14 de noviembre: el parser arma el árbol
+
+`compilador/` suma `arbol.py` y el parser completo. `python main.py programa.txt` ya no lista tokens: imprime el árbol.
+Los modos anteriores siguen con `--tokens` (recorrer con el Parser) y `--tabla`. `pruebas_14nov.py` corre los 22 casos.
+
+### La gramática (EBNF)
+
+En TocaScript el fin de instrucción es el salto de línea (`NL`), no el `;`, y una declaración no lleva tipo: el valor
+lleva el suyo (`tempo 120`, como en la cabecera de la gramática del parcial).
+
+```
+programa    ::= ( instruccion | NL )* EOF
+instruccion ::= declaracion | asignacion | salida
+declaracion ::= IDENTIFICADOR expresion fin
+asignacion  ::= IDENTIFICADOR '=' expresion fin
+salida      ::= 'mostrar' expresion fin
+fin         ::= NL | EOF
+expresion   ::= termino ( ( '+' | '-' ) termino )*
+termino     ::= factor ( ( '*' | '/' ) factor )*
+factor      ::= NUMERO | TEXTO | BOOLEANO | IDENTIFICADOR | '(' expresion ')'
+```
+
+`declaracion` y `asignacion` empiezan con IDENTIFICADOR: el parser mira el token siguiente. Si es `=`, es asignación.
+
+| Pieza | Archivo | Qué hace |
+|---|---|---|
+| Errores | `tokens.py` | `ErrorDeLenguaje` guarda mensaje, línea y columna; `ErrorLexico` y `ErrorSintactico` heredan de ella y solo cambian el nombre de la fase |
+| Nodos | `arbol.py` | hojas `Numero`, `Cadena`, `Booleano`, `Variable`; `OperacionBinaria`, `Declaracion`, `Asignacion`, `Mostrar` y la raíz `Programa`. `mostrar_arbol` los imprime con sangría |
+| Parser | `parser.py` | descenso recursivo: un método por regla. `esperar(tipo, texto)` avanza o lanza `ErrorSintactico`; `siguiente()` mira un token adelante; `fin()` exige `NL` o `EOF` |
+| main.py | `main.py` | lexer → parser → árbol; un solo `except ErrorDeLenguaje` atrapa el error léxico y el sintáctico |
+
+```
+cd compilador
+python main.py declaraciones.txt
+Programa
+  Declaracion tempo
+    Numero 120
+  ...
+  Declaracion total
+    OperacionBinaria +
+      OperacionBinaria *
+        Variable tempo
+        Numero 2
+      Numero 1
+  Asignacion volumen
+    OperacionBinaria /
+      OperacionBinaria -
+        Variable tempo
+        Numero 20
+      Numero 4
+  Mostrar
+    Variable total
+
+python main.py sintactico.txt
+Error sintáctico en línea 2, columna 18: se esperaba un número, una variable o '(' y llegó el fin de la línea
+linea = 2, columna = 18
+```
+
+| Entrada | Salida |
+|---|---|
+| `r 10 - 3 - 2` | `Declaracion r` con `OperacionBinaria -` cuyo hijo izquierdo es `10 - 3` |
+| `x 5 3` | `Error sintáctico en línea 1, columna 5: se esperaba el fin de la línea y llegó '3'` |
+| `y 4 + * 2` | `Error sintáctico en línea 1, columna 7: se esperaba un número, una variable o '(' y llegó '*'` |
+| `z (1 + 2` | `Error sintáctico en línea 1, columna 9: se esperaba ')' y llegó el fin del archivo` |
+
 ## `paso2.py` y `paso3.py`
 
 Los pasos 2 y 3 de la guía no tienen mini-ejercicio; son apuntes de apoyo (`len`, `t[i]`, `t[a:b]`, `if` / `elif` con `isdigit` e `isalpha`).

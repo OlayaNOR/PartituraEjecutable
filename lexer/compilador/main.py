@@ -1,11 +1,13 @@
-# main.py · lee un archivo, lo pasa por el lexer y recorre los tokens con el Parser
+# main.py · lee un programa de TocaScript, lo pasa por el lexer y el parser e imprime el árbol
 # Uso: python main.py programa.txt
-#      python main.py --tabla programa.txt   (la tabla de tokens de la tarea 15)
+#      python main.py --tokens programa.txt   (recorre los tokens con el Parser, como el 7 de noviembre)
+#      python main.py --tabla programa.txt    (la tabla de tokens de la tarea 15)
 
 import sys
+from arbol import mostrar_arbol
 from lexer import tokenizar
 from parser import Parser
-from tokens import ErrorLexico
+from tokens import ErrorDeLenguaje
 
 
 def mostrar_tabla(tokens):
@@ -22,27 +24,37 @@ def recorrer(tokens):
     print(parser.actual())                # el EOF también se imprime
 
 
-if __name__ == "__main__":
+def main():
     args = sys.argv[1:]
-    tabla = "--tabla" in args
-    if tabla:
-        args.remove("--tabla")
+    modo = "arbol"
+    for opcion in ("--tokens", "--tabla"):
+        if opcion in args:
+            args.remove(opcion)
+            modo = opcion[2:]
     if len(args) != 1:
-        print("Uso: python main.py [--tabla] <archivo>")
+        print("Uso: python main.py [--tokens | --tabla] <archivo>")
         sys.exit(2)
     ruta = args[0]
     try:
-        texto = open(ruta, encoding="utf-8").read()
+        with open(ruta, encoding="utf-8") as archivo:
+            codigo = archivo.read()
     except FileNotFoundError:
         print(f"No se encontró el archivo '{ruta}'")
         sys.exit(1)
     try:
-        tokens = tokenizar(texto)
-    except ErrorLexico as e:
-        print(e)                                          # el mensaje completo
+        tokens = tokenizar(codigo)
+        if modo == "tabla":
+            mostrar_tabla(tokens)
+        elif modo == "tokens":
+            recorrer(tokens)
+        else:
+            programa = Parser(tokens).programa()
+            mostrar_arbol(programa)
+    except ErrorDeLenguaje as e:          # atrapa el léxico y el sintáctico: los dos heredan de ErrorDeLenguaje
+        print(e)                                            # el mensaje completo
         print(f"linea = {e.linea}, columna = {e.columna}")  # la posición, leída por separado
         sys.exit(1)
-    if tabla:
-        mostrar_tabla(tokens)
-    else:
-        recorrer(tokens)
+
+
+if __name__ == "__main__":
+    main()

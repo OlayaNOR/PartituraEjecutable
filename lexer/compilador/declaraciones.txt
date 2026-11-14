@@ -1,0 +1,8 @@
+# declaraciones, asignaciones y salida de TocaScript
+tempo 120
+umbral 0.75
+compas "4/4"
+es_intro true
+total tempo * 2 + 1
+volumen = (tempo - 20) / 4
+mostrar total

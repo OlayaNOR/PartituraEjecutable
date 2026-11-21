@@ -1,0 +1,8 @@
+# factorial de 5
+n 5
+resultado 1
+repetir mientras n > 1 {
+    resultado = resultado * n
+    n = n - 1
+}
+mostrar resultado

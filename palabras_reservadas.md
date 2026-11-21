@@ -252,7 +252,7 @@ tempo = 96
 
 Gracias a eso, la misma variable que la pieza fija en su cabecera es la que las reglas consultan después. No hay dos conceptos, hay uno solo.
 
-La lista completa de variables con su tipo de dato en Java está en el [README](README.md).
+La lista completa de variables con su tipo de dato en Java está en [DISENO.md](DISENO.md).
 
 ---
 

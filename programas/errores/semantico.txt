@@ -1,0 +1,2 @@
+tempo 120
+mostrar tempo / (tempo - 120)

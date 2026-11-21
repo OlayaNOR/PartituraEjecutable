@@ -1,0 +1,9 @@
+# cuentas con variables, decimales y textos
+precio 12000
+cantidad 3
+total precio * cantidad
+mostrar total
+promedio total / 4.0
+mostrar promedio
+mensaje "Fin del calculo"
+mostrar mensaje

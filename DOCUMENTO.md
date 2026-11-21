@@ -537,7 +537,7 @@ Aho, A. V., Lam, M. S., Sethi, R. & Ullman, J. D. — *Compilers: Principles, Te
 
 | Archivo | Qué contiene |
 |---|---|
-| `README.md` | El lenguaje completo, las 15 reglas y la tabla de variables |
+| `DISENO.md` | El lenguaje completo, las 15 reglas y la tabla de variables |
 | `reglas.txt` | Las 15 reglas en su forma oficial |
 | `REGLAS.md` | Qué hace cada regla y por qué |
 | `palabras_reservadas.md` | Los 73 términos con categoría y significado |

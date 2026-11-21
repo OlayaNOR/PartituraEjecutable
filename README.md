@@ -1,266 +1,213 @@
 # TocaScript
 
-**Grupo 8** · Lenguajes Formales
+Un lenguaje para escribir música que además se ejecuta. Un programa en TocaScript se lee como el encabezado y las indicaciones de una partitura, y el intérprete lo corre.
 
-**Integrantes:** Alarcon · Olaya · Garcia
+**Integrantes del grupo 8 de Lenguajes Formales**
 
----
+- Valeria Alarcón Munera
+- Nicolás Olaya Rincón
+- Andrew García Mosquera
 
-## Dominio del sistema
+## Cómo ejecutar
 
-**Interpretación musical.**
-
-El sistema procesa reglas que deciden **cómo debe sonar una pieza** según lo que esté ocurriendo mientras suena: qué tan rápida va, en qué sección está, cuántos instrumentos hay tocando, qué tan intensa es la música en ese momento.
-
-Un músico hace esto todo el tiempo sin pensarlo: baja el volumen al final de una canción, ataca más fuerte cuando el tema es rápido, acorta las notas cuando hay mucha gente tocando a la vez. TocaScript escribe esas decisiones como reglas que el sistema aplica solo.
-
-Los archivos del lenguaje usan la extensión **`.toca`**.
-
----
-
-## Sintaxis general de una regla
+Hace falta Python 3.10 o superior. No usa librerías externas.
 
 ```
-# Sintaxis general de una regla:
-# AL <condicion> [Y|O <condicion>] TOCAR <accion>
-#
-# <condicion>  ::= <operando> <operador> <operando>
-# <operando>   ::= <variable> | <valor> | <operando> (+|-|*|/) <operando>
-# <operador>   ::= > | < | = | >= | <= | <>
-# <variable>   ::= identificador en minusculas con guion_bajo
-# <valor>      ::= numero (entero o decimal) | true | false | "texto"
-# <accion>     ::= identificador en minusculas con guion_bajo
-#                | <variable> = <operando>
-#                | mostrar <operando>
+python main.py programa.txt
 ```
 
-### Gramática completa
-
-La gramática entera, en BNF y con todos los terminales entre comillas, está en [`gramatica.md`](gramatica.md): **33 producciones**, abiertas hasta `<letra>`, `<digito>` y el salto de línea, con terminales y no terminales etiquetados como comentario. La regla es su producción 14:
+Otros modos para ver lo que hace cada fase:
 
 ```
-<regla>     ::= "AL" <expresion> "TOCAR" <acciones> <nl>
-<expresion> ::= <termino> { "O" <termino> }
-<termino>   ::= <factor> { "Y" <factor> }
-<factor>    ::= "NO" <factor> | "(" <expresion> ")" | <condicion> | <variable>
-<condicion> ::= <operando> <operador> <operando>
-<operando>  ::= <sumando> { "+" <sumando> | "-" <sumando> }
-<sumando>   ::= <primario> { "*" <primario> | "/" <primario> }
-<primario>  ::= <variable> | <valor> | "(" <operando> ")"
+python main.py --tokens programa.txt     muestra los tokens que entrega el lexer
+python main.py --arbol programa.txt      muestra el árbol que arma el parser
 ```
 
-La gramática de `<expresion>` está escrita en tres niveles —`expresion`, `termino`, `factor`— porque así queda codificada la precedencia sin necesidad de reglas aparte: `NO` liga más fuerte que `Y`, y `Y` más fuerte que `O`. La aritmética usa la misma técnica, `operando` → `sumando` → `primario`, y por eso `*` y `/` van antes que `+` y `-`. Las 15 reglas de `reglas.txt` están derivadas una a una contra esta gramática en [`VERIFICACION-REGLAS.md`](VERIFICACION-REGLAS.md).
+Las pruebas de todo el proyecto se corren con `python pruebas/pruebas_final.py`. En la carpeta `programas` están los programas de muestra y tres archivos con un error de cada fase.
 
-### Por qué estas palabras clave
+## Ficha del lenguaje
 
-| Palabra | Por qué |
+### Nombre
+
+**TocaScript** viene de *tocar*. Una partitura no explica, indica cómo hay que tocar. Por eso el verbo central del lenguaje es `TOCAR` y de ahí sale el nombre. Las reglas dicen "al pasar esto, toca así", y se escriben `AL condición TOCAR`.
+
+### Tabla de traducción desde Java
+
+| Qué | Java | TocaScript |
+|---|---|---|
+| Tipos | `int edad = 20;` y `double nota = 4.5;` y `String s = "hola";` y `boolean b = true;` | no se escriben. El valor trae su tipo y la variable lo conserva: `edad 20` es entero, `nota 4.5` es decimal, `s "hola"` es texto y `b true` es booleano |
+| Asignación | `edad = edad + 1;` | `edad = edad + 1` |
+| Fin de instrucción | `;` | el salto de línea |
+| Salida | `System.out.println(total);` | `mostrar total` |
+| Condicional | `if (n > 2) { ... } else { ... }` | `AL n > 2 TOCAR { ... } SINO { ... }` |
+| Ciclo | `while (n <= 5) { ... }` | `repetir mientras n <= 5 { ... }` |
+| Ciclo con contador | `for (int i = 1; i <= 3; i = i + 1) { ... }` | `repetir 3 con i { ... }` |
+| Igual y distinto | `==` y `!=` | `=` y `<>` |
+| Lógicos | `&&` y `\|\|` y `!` | `Y` y `O` y `NO` |
+| Comentario | `// una línea` y `/* bloque */` | `# una línea` y `/* bloque */` |
+
+### Decisión de diseño
+
+**Declarar una variable es escribir su nombre y su valor, sin tipo y sin signo igual.** En una partitura arriba se escribe `tempo 120` o `compas "4/4"`, y nadie aclara que 120 es un número. TocaScript hace lo mismo: `tempo 120` crea la variable y el valor decide su tipo. Desde ahí el tipo queda fijo, así que `tempo = "rapido"` es un error semántico. Así un programa empieza como empieza una partitura y el control de tipos no se pierde.
+
+Otras dos decisiones que salen de la misma idea:
+
+- El salto de línea termina la instrucción, como cada indicación de una partitura va en su renglón. No hay punto y coma.
+- Un texto se puede unir con un número: `mostrar "tempo " + tempo` muestra `tempo 120`. En una partitura se escribe así la indicación de tempo.
+
+## Gramática final en EBNF
+
+`::=` se lee "está formado por", `|` se lee "o", `*` es cero o más veces y `?` es cero o una vez. Lo que va entre comillas es un token exacto y lo que va en mayúsculas es un tipo de token.
+
+```
+programa    ::= ( instruccion | NL )* EOF
+instruccion ::= declaracion | asignacion | salida | condicional | ciclo | repeticion
+declaracion ::= IDENTIFICADOR condicion fin
+asignacion  ::= IDENTIFICADOR '=' condicion fin
+salida      ::= 'mostrar' condicion fin
+condicional ::= 'AL' condicion 'TOCAR' bloque ( 'SINO' bloque )? fin
+ciclo       ::= 'repetir' 'mientras' condicion bloque fin
+repeticion  ::= 'repetir' expresion ( 'con' IDENTIFICADOR )? bloque fin
+bloque      ::= '{' ( instruccion | NL )* '}'
+fin         ::= NL | EOF
+condicion   ::= conjuncion ( 'O' conjuncion )*
+conjuncion  ::= negacion ( 'Y' negacion )*
+negacion    ::= 'NO' negacion | comparacion
+comparacion ::= expresion ( ( COMPARADOR | '=' ) expresion )?
+expresion   ::= termino ( ( '+' | '-' ) termino )*
+termino     ::= factor ( ( '*' | '/' ) factor )*
+factor      ::= '-' factor | NUMERO | TEXTO | BOOLEANO | IDENTIFICADOR | '(' condicion ')'
+```
+
+Notas de la gramática:
+
+- `declaracion` y `asignacion` empiezan con un nombre. El parser mira el token siguiente y si es `=` es una asignación.
+- El `=` asigna cuando es una instrucción y compara dentro de una condición. `AL compas = "4/4" TOCAR` pregunta si son iguales.
+- Antes de la llave que cierra un bloque una instrucción también puede terminar, así que `AL n > 2 TOCAR { mostrar n }` cabe en una línea.
+- `O` está por debajo de `Y`, `Y` por debajo de `NO` y `NO` por debajo de la comparación. Por eso `true O false Y false` da `true`.
+- La recursión por la izquierda se evita con `*`, que en el parser es un `while`.
+- COMPARADOR es `<`, `>`, `<=`, `>=` o `<>`. El lexer revisa primero los de dos caracteres.
+
+## Reglas de operaciones entre tipos
+
+| Operación | entero con entero | con al menos un decimal | texto con texto | texto con número | con un booleano |
+|---|---|---|---|---|---|
+| `+` | entero | decimal | une los textos | une, el número pasa a texto | error |
+| `-` y `*` | entero | decimal | error | error | error |
+| `/` | división entera, se corta hacia cero | decimal | error | error | error |
+| `<` `>` `<=` `>=` | compara | compara | error | error | error |
+| `=` y `<>` | compara | compara | compara | error | solo con otro booleano |
+| `Y` `O` `NO` | error | error | error | error | operan |
+
+Así `7 / 2` da `3`, `7 / 2.0` da `3.5`, `"ho" + "la"` da `hola`, `"tempo " + 120` da `tempo 120` y `"hola" * 2` da un error en la columna del `*`.
+
+Qué guarda cada variable:
+
+| Tipo de la variable | Acepta |
 |---|---|
-| **`AL`** | Las reglas no se evalúan una vez: se revisan en **cada compás**. `AL` expresa algo que ocurre cada vez que se da la condición, no una decisión puntual. Y encaja con el dominio: *al llegar al estribillo*, *al pasar el compás 24*. |
-| **`TOCAR`** | Es el verbo central del lenguaje y la raíz de su nombre. Una regla no «ejecuta una acción»: dice cómo hay que **tocar** la música cuando se cumple la condición. |
-| **`NO`** | «Cuando **no** haya percusión» aparece dos veces entre las 15 reglas. Sin `NO` habría que inventar una variable `sin_percusion`, duplicando información. |
-| **`( )`** | Sin paréntesis, `Y` se evalúa antes que `O` y la regla 11 significaría otra cosa. |
+| entero | enteros |
+| decimal | decimales y enteros, que se guardan como decimal |
+| texto | textos |
+| booleano | `true` y `false` |
 
-### Otras decisiones de sintaxis
+Los errores semánticos que revisa el intérprete:
 
-| Decisión | Forma | Por qué |
-|---|---|---|
-| Operadores `>=` `<=` `<>` | `num_voces >= 4` | «cuatro voces o más» es una condición natural del dominio; con solo `>` habría que escribir `num_voces > 3`, que dice lo mismo pero se lee peor |
-| Condición booleana simple | `es_coda` | equivale a `es_coda = true`; la forma corta evita decir lo mismo dos veces |
-| Acción por asignación | `dinamica = "ff"` | la mayoría de acciones musicales fijan una propiedad, no invocan un procedimiento |
-| Acciones múltiples y aritmética | `<accion> Y <accion>`<br>`tempo = tempo - 10` | la regla 12 hace dos cosas; las reglas 11, 14 y 15 calculan el valor nuevo a partir del actual |
-| Impresión | `mostrar tempo` | ver un valor mientras la pieza suena, para depurar el intérprete; acepta variable, número, texto o cuenta |
-| Declaración de variables propias | `umbral 0.7` en la cabecera | después de `tempo`, `compas` y `tonalidad` se pueden fijar variables nuevas; sin tipo y sin `=`, para distinguirla de la asignación |
+1. Usar o asignar una variable que no se ha declarado.
+2. Declarar dos veces la misma variable en el mismo bloque.
+3. Guardar un valor de un tipo que la variable no acepta.
+4. Dividir por cero.
+5. Una condición de `AL` o de `repetir mientras` que no da `true` o `false`.
+6. Un ciclo que pasa de 100000 vueltas, para que el intérprete no se quede pegado.
 
----
+## Requerimientos electivos
 
-## Convención de escritura
-
-| Elemento | Convención | Ejemplo |
-|---|---|---|
-| Palabras reservadas | MAYÚSCULAS | `AL`, `TOCAR`, `Y`, `O`, `NO` |
-| Variables | minúsculas con guion bajo | `compas_actual`, `tiene_percusion` |
-| Acciones | minúsculas con guion bajo | `activar_percusion`, `subir_una_octava` |
-| Literales de texto | entre comillas dobles | `"ff"`, `"staccato"` |
-| Comentarios | empiezan con `#` | `# R1 - acento fuerte` |
-| Formato | una regla por línea | ver abajo |
-
-**Precedencia**, de más fuerte a más débil: `*` `/` → `+` `-` → comparaciones → `NO` → `Y` → `O`. Los paréntesis siempre mandan.
-
-**El lenguaje distingue mayúsculas de minúsculas**, y esa distinción hace trabajo: las palabras de las reglas van en mayúsculas y las de la pieza en minúsculas, así se separan de un vistazo y nunca chocan entre sí.
-
-Los **73 términos reservados** del lenguaje —palabras clave, operadores, delimitadores, figuras y notas— están documentados uno por uno, con su categoría y significado, en [`palabras_reservadas.md`](palabras_reservadas.md). Ahí están también las convenciones léxicas: qué forma tiene un identificador, un número, un literal de texto o una nota.
-
----
-
-## Las 15 reglas
-
-En su forma oficial están en [`reglas.txt`](reglas.txt). La explicación detallada de cada una, con el porqué musical, está en [`REGLAS.md`](REGLAS.md).
-
-### Grupo A · Una sola condición · *5 reglas*
-
-| # | Regla | En lenguaje natural |
-|---|---|---|
-| R1 | `AL tempo > 140 TOCAR dinamica = "ff"` | Si la pieza va a más de 140 pulsos por minuto, tócala fuerte. |
-| R2 | `AL compas = "3/4" TOCAR acentuar_primer_tiempo` | En un compás de tres tiempos, marca el primero. |
-| R3 | `AL es_coda TOCAR dinamica = "pp"` | En el cierre de la pieza, baja al volumen más suave. |
-| R4 | `AL es_intro TOCAR dinamica = "p"` | La introducción se toca suave. |
-| R5 | `AL num_voces > 3 TOCAR articulacion = "staccato"` | Si hay más de tres instrumentos a la vez, que toquen las notas cortas y separadas. |
-
-### Grupo B · Condiciones compuestas con Y / O · *6 reglas*
-
-| # | Regla | En lenguaje natural |
-|---|---|---|
-| R6 | `AL es_estribillo Y intensidad > 0.7 TOCAR activar_percusion` | Si estamos en el estribillo y la música va intensa, entra la batería. |
-| R7 | `AL compas_actual > 24 O es_coda TOCAR aplicar_crescendo` | Si pasamos el compás 24 o estamos en el cierre, sube el volumen poco a poco. |
-| R8 | `AL tempo < 80 Y NO hay_repeticion TOCAR articulacion = "legato"` | Si la pieza va lenta y no estamos repitiendo, toca las notas pegadas y fluidas. |
-| R9 | `AL es_estrofa O hay_repeticion TOCAR dinamica = "mp"` | En las estrofas y dentro de cualquier repetición, volumen medio-bajo. |
-| R10 | `AL hay_repeticion Y repeticion_actual = 2 TOCAR subir_una_octava` | En la segunda vuelta de una repetición, toca todo una octava más agudo. |
-| R11 | `AL (es_coda O es_final) Y NO tiene_percusion TOCAR tempo = tempo - 10` | Si es el cierre o la última sección y no hay percusión, frena diez puntos. |
-
-### Grupo C · Tipos distintos combinados · *4 reglas*
-
-| # | Regla | En lenguaje natural | Tipos |
-|---|---|---|---|
-| R12 | `AL intensidad >= 0.9 Y es_estribillo TOCAR dinamica = "fff" Y duplicar_octava` | Si la intensidad está casi al máximo y estamos en el estribillo, sube al volumen más alto y duplica la melodía una octava arriba. | `double` + `boolean` |
-| R13 | `AL nota_actual > 91 Y NO permitir_agudos TOCAR bajar_una_octava` | Si la nota es más aguda que el `sol6` y la pieza no autorizó agudos, bájala una octava. | `int` + `boolean` |
-| R14 | `AL num_voces >= 4 Y tiene_percusion TOCAR volumen = volumen - 15` | Si hay cuatro o más voces y una es percusión, baja el volumen general quince puntos. | `int` + `boolean` |
-| R15 | `AL compas_actual >= duracion_total - 2 Y es_final TOCAR tempo = tempo * 0.85` | Cuando faltan dos compases o menos y es la última sección, baja la velocidad al 85%. | `int` + `boolean` |
-
-### Clasificación
-
-| Grupo | Qué las define | Reglas | Total |
-|---|---|---|---|
-| A | Una sola condición | R1 R2 R3 R4 R5 | **5** |
-| B | Compuestas con `Y` / `O` | R6 R7 R8 R9 R10 R11 | **6** |
-| C | Numérico + booleano en la misma condición | R12 R13 R14 R15 | **4** |
-
-> Las reglas 6, 7, 8 y 10 *también* mezclan numérico con booleano. Se clasificaron en el grupo B porque lo que las define principalmente es el uso de conectores lógicos.
-
----
-
-## Clasificación de variables
-
-Las condiciones solo pueden hablar de estas variables. Cualquier otro nombre dentro de una condición es un error.
-
-### Numéricas
-
-| Variable | Tipo Java | Ejemplo | Qué guarda |
-|---|---|---|---|
-| `tempo` | `int` | `96` | Velocidad de la pieza en pulsos por minuto. 60 es lento, 120 normal, 180 rápido. |
-| `compas_actual` | `int` | `16` | En qué trozo de la pieza vamos. Empieza en 1 y sube. |
-| `duracion_total` | `int` | `14` | Cuántos compases tiene la pieza completa. |
-| `intensidad` | `double` | `0.85` | Qué tan intensa va la música, de 0.0 a 1.0. Se deriva de la dinámica. |
-| `num_voces` | `int` | `3` | Cuántas líneas musicales suenan a la vez. |
-| `nota_actual` | `int` | `60` | Altura de la nota que suena, en notación MIDI. 60 es el `do4`. |
-| `repeticion_actual` | `int` | `2` | En qué vuelta vamos dentro de una repetición. |
-| `volumen` | `int` | `100` | Volumen de salida, de 0 a 127. |
-
-### Booleanas
-
-| Variable | Tipo Java | Ejemplo | Es `true` cuando… |
-|---|---|---|---|
-| `es_intro` | `boolean` | `true` | Estamos en la introducción de la pieza. |
-| `es_estrofa` | `boolean` | `false` | Estamos en una estrofa. |
-| `es_estribillo` | `boolean` | `true` | Estamos en el estribillo, la parte que se repite. |
-| `es_coda` | `boolean` | `false` | Estamos en la coda, el cierre. |
-| `es_final` | `boolean` | `false` | Es la última sección de la pieza. |
-| `hay_repeticion` | `boolean` | `true` | El compás está dentro de un bloque que se repite. |
-| `tiene_percusion` | `boolean` | `false` | Alguna voz activa usa batería o percusión. |
-| `permitir_agudos` | `boolean` | `true` | La pieza autoriza sonidos muy agudos. |
-
-### De texto
-
-| Variable | Tipo Java | Ejemplo | Qué guarda |
-|---|---|---|---|
-| `dinamica` | `String` | `"ff"` | Volumen actual: `"pp"`, `"p"`, `"mp"`, `"mf"`, `"f"`, `"ff"`, `"fff"`. |
-| `articulacion` | `String` | `"legato"` | Cómo se atacan las notas: `"legato"`, `"staccato"`, `"normal"`. |
-| `compas` | `String` | `"4/4"` | Cuántos tiempos entran en cada compás. |
-| `tonalidad` | `String` | `"Do mayor"` | Tonalidad de la pieza. |
-
-### Acciones disponibles
-
-| Acción | Qué hace |
-|---|---|
-| `acentuar_primer_tiempo` | Ataca con más fuerza el primer tiempo de cada compás. |
-| `activar_percusion` | Suma una voz de batería. |
-| `aplicar_crescendo` | Sube el volumen de forma progresiva. |
-| `subir_una_octava` | Toca todo doce semitonos más agudo. |
-| `bajar_una_octava` | Toca todo doce semitonos más grave. |
-| `duplicar_octava` | Dobla la melodía una octava arriba, sonando las dos a la vez. |
-
-Además, cualquier variable puede recibir un valor directamente: `dinamica = "ff"`, `tempo = tempo - 10`.
-
-### La cabecera de una pieza son asignaciones
-
-Las primeras líneas de un archivo `.toca` fijan las variables de la pieza:
+**1. Ciclo con contador.** Es el `repetir` de TocaScript, que ya existía en la gramática del lenguaje para repetir un motivo. `repetir 3 { ... }` repite el bloque tres veces y `repetir 3 con vuelta { ... }` además crea la variable `vuelta`, que vale 1, 2 y 3. El contador solo existe dentro del bloque. Si las veces no son un entero de cero en adelante, sale un error semántico.
 
 ```
-tempo 100
-compas "4/4"
-tonalidad "Do mayor"
+repetir 3 con vuelta {
+    mostrar vuelta * 10
+}
 ```
 
-`tempo 100` es azúcar sintáctico de `tempo = 100`. Gracias a eso, **la misma variable que la pieza fija en su cabecera es la que las reglas consultan después**: no hay dos conceptos, hay uno solo. Por eso `tempo`, `compas` y `tonalidad` aparecen en la tabla de variables y no en la de palabras reservadas.
+Salida: `10`, `20` y `30`.
 
-Los nombres de instrumento son **literales de texto**, no palabras del lenguaje: `voz bajo con "contrabajo"`. Así el conjunto de instrumentos queda abierto sin tener que reservar una palabra por cada uno.
+**2. Tipo booleano.** `true` y `false` se guardan en variables y sirven como condición. Una comparación da un booleano, así que se puede guardar. Una variable booleana no acepta otro tipo y una condición que no da booleano es un error.
 
----
+```
+listo 4 > 3
+mostrar listo
+AL listo TOCAR { mostrar "ok" }
+```
 
-## Conceptos musicales mínimos
-
-Para leer las reglas sin saber música. Nada más que esto hace falta.
-
-| Término | En palabras simples |
-|---|---|
-| **Compás** | La pieza se divide en trozos de igual duración, como los renglones de un cuaderno. |
-| **Tempo** | La velocidad de la pieza, en pulsos por minuto. |
-| **Dinámica** | El volumen escrito en la partitura. De más suave a más fuerte: `pp`, `p`, `mp`, `mf`, `f`, `ff`, `fff`. |
-| **Voz** | Una línea musical independiente. Varias voces suenan a la vez, como distintos instrumentos de una banda. |
-| **Articulación** | Cómo se atacan las notas: *legato* es pegadas y fluidas, *staccato* es cortas y separadas. |
-| **Estrofa / estribillo / coda** | Las partes de una canción. El estribillo es lo que se repite, la coda es el cierre. |
-| **Octava** | La misma nota, más aguda o más grave. Subir una octava son doce semitonos. |
-| **Crescendo** | Subir el volumen poco a poco. |
-| **Ritardando** | Frenar poco a poco, normalmente al final. |
-
----
-
-## Cómo se aplican las reglas
-
-Una regla **nunca se invoca**. Se escribe una vez y el sistema la vigila sola.
-
-El sistema recorre la pieza compás por compás. Antes de hacer sonar cada uno:
-
-1. **Toma una foto del estado** — compás, sección, voces, intensidad
-2. **Evalúa las 15 reglas** contra esa foto, en orden de declaración
-3. **Aplica las acciones** de las que se cumplieron
-4. **Suena el compás**, ya con los ajustes
-
-Las reglas leen el estado **como estaba al empezar el compás**, no como va quedando. Así el orden solo importa para las escrituras, nunca para las lecturas.
-
-Si dos reglas fijan la misma propiedad en el mismo compás, **gana la última que se cumpla** y el sistema emite una advertencia. Ocurre a propósito entre las reglas 3 y 7 en la coda, para tener un caso concreto con el que justificar la política.
-
-El recorrido completo, compás a compás, está en [`REGLAS.md`](REGLAS.md).
-
----
+Salida: `true` y `ok`.
 
 ## Estructura del repositorio
 
 ```
-PartituraEjecutable/
-├── README.md                  ← este archivo: el lenguaje, las 15 reglas y las variables
-├── reglas.txt                 ← las 15 reglas en su forma oficial, con la sintaxis general como comentario
-├── REGLAS.md                  ← qué hace cada regla y por qué
-├── palabras_reservadas.md     ← los 73 términos reservados, con categoría y significado
-├── gramatica.md               ← las 33 producciones BNF, con terminales y no terminales etiquetados
-├── gramatica/                 ← una ficha por producción: desglose, derivación, ejemplo inválido
-├── VERIFICACION-REGLAS.md     ← las 15 reglas derivadas una a una contra la gramática
-├── verificar.py               ← el parser que implementa las 33 producciones y hace la verificación
-├── DOCUMENTO.md               ← documento general: todo lo anterior en un solo sitio
-├── COMPARACION-EJEMPLO.md     ← el programa de ejemplo derivado línea por línea
-├── BIBLIOGRAFIA.md            ← la consulta bibliográfica
-└── ejemplos/                  ← programas de ejemplo
+README.md          este documento
+tokens.py          la clase Token y los errores de cada fase, que heredan de ErrorDeLenguaje
+lexer.py           convierte el texto en tokens con línea y columna
+arbol.py           los nodos del árbol y la función que lo imprime
+parser.py          la gramática como métodos: arma el árbol o lanza ErrorSintactico
+interprete.py      recorre el árbol, guarda las variables en entornos anidados y lanza ErrorSemantico
+main.py            une las tres fases y señala el error en el código con un ^
+programa.txt       un programa de ejemplo
+programas/         los tres programas de muestra, otros ejemplos y un error de cada fase
+pruebas/           las pruebas de todo el proyecto
 ```
 
----
+El resto del repositorio es la historia del lenguaje a lo largo del semestre. El diseño original y las 15 reglas están en `DISENO.md`, la gramática del primer corte con sus 33 producciones en `gramatica.md`, y los pasos con los que se construyó el lexer en la carpeta `lexer`.
 
-*Grupo 8 · Alarcon · Olaya · Garcia · Lenguajes Formales*
+## Programas de muestra
+
+**Tabla de multiplicar del 3** en `programas/tabla_del_3.txt`
+
+```
+n 1
+repetir mientras n <= 5 {
+    mostrar n * 3
+    n = n + 1
+}
+```
+
+Salida: `3`, `6`, `9`, `12` y `15`.
+
+**Factorial de 5** en `programas/factorial.txt`
+
+```
+n 5
+resultado 1
+repetir mientras n > 1 {
+    resultado = resultado * n
+    n = n - 1
+}
+mostrar resultado
+```
+
+Salida: `120`.
+
+**Promedio de tres notas** en `programas/promedio.txt`
+
+```
+promedio (3.0 + 4.0 + 5.0) / 3.0
+mostrar promedio
+AL promedio >= 3.0 TOCAR {
+    mostrar "aprueba"
+} SINO {
+    mostrar "reprueba"
+}
+```
+
+Salida: `4.0` y `aprueba`.
+
+## Errores que señalan el código
+
+Los tres tipos de error se atrapan igual en `main.py`. Además del mensaje se muestra la línea del programa con un `^` debajo de la columna.
+
+```
+> python main.py programas/errores/semantico.txt
+Error semántico en línea 2, columna 15: división por cero
+    mostrar tempo / (tempo - 120)
+                  ^
+linea = 2, columna = 15
+```

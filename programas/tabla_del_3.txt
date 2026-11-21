@@ -1,0 +1,6 @@
+# tabla de multiplicar del 3
+n 1
+repetir mientras n <= 5 {
+    mostrar n * 3
+    n = n + 1
+}

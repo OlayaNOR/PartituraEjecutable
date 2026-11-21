@@ -1,0 +1,29 @@
+# TocaScript completo: cabecera, reglas, ciclos, logicos, negativos y alcance
+tempo 120
+umbral 0.75
+compas "4/4"
+es_intro true
+
+/* la regla sube el volumen si el tempo es alto
+   y el compas es el normal */
+volumen 60
+AL tempo >= 100 Y NO (compas <> "4/4") TOCAR {
+    volumen = volumen + 20
+    mostrar "volumen alto: " + volumen
+} SINO {
+    mostrar "volumen normal"
+}
+
+# cuenta regresiva antes de entrar
+repetir 3 con vuelta {
+    faltan 4 - vuelta
+    mostrar "entra en " + faltan
+}
+
+# el tempo baja hasta 100, de 10 en 10
+repetir mientras tempo > 100 {
+    tempo = tempo - 10
+}
+mostrar "tempo final: " + tempo
+mostrar -umbral * 2
+mostrar es_intro O tempo < 90

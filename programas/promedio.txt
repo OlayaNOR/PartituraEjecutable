@@ -1,0 +1,8 @@
+# promedio de tres notas
+promedio (3.0 + 4.0 + 5.0) / 3.0
+mostrar promedio
+AL promedio >= 3.0 TOCAR {
+    mostrar "aprueba"
+} SINO {
+    mostrar "reprueba"
+}

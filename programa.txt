@@ -1,0 +1,13 @@
+# suma del 1 al 5 y una decision con el resultado
+n 1
+suma 0
+repetir mientras n <= 5 {
+    suma = suma + n
+    n = n + 1
+}
+mostrar suma
+AL suma > 10 TOCAR {
+    mostrar "grande"
+} SINO {
+    mostrar "pequeño"
+}

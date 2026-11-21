@@ -1,0 +1,3 @@
+tempo 120
+AL tempo > 100 TOCAR {
+    mostrar "rapido"
